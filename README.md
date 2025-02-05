@@ -2,4 +2,4 @@
 Repository progetto piattaforma agricola locale
 Scarciglia Antonello
 Scagnetti Alessandro
-Seyarober Andronache
+Seya Andronache
