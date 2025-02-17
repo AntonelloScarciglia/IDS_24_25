@@ -8,6 +8,7 @@ import it.cs.unicam.ids.filiera.domainModel.products.Product;
 import it.cs.unicam.ids.filiera.repositories.ProductRepository;
 
 import it.cs.unicam.ids.filiera.util.Status;
+import it.cs.unicam.ids.filiera.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class ProductService {
 
 	/**
 	 * method to retrieve a products from the repository
-	 * @param id
+	 * @param id Long
 	 * @return Product
 	 */
 	public Product getProduct(Long id){
@@ -38,7 +39,7 @@ public class ProductService {
 
 	/**
      * method to save a new product in the repository
-     * @param product
+     * @param product Product
      */
 	public void saveProduct(Product product) {
 		productRepo.save(product);
@@ -46,7 +47,7 @@ public class ProductService {
 
 	/**
 	 * Method to retrieve all products from the repository about the specified owner
-	 * @param creator
+	 * @param creator User
 	 * @return List of all products of the specified owner
 	 */
 	public List<Product> filterByCreator(User creator) {
@@ -56,7 +57,7 @@ public class ProductService {
 
 	/**
 	 * Method to retrieve all products from the repository about the specified status
-	 * @param status
+	 * @param status Status
 	 * @return List of all products of the specified status
 	 */
 	public List<Product> filterByStatus(Status status) {
@@ -66,8 +67,8 @@ public class ProductService {
 
 	/**
 	 * Method to retrieve all products from a specified creator and a specified status
-	 * @param creator
-	 * @param status
+	 * @param creator User
+	 * @param status Status
 	 * @return List of all products of the specified creator and the specified status
 	 */
 	public List<Product> filterByCreatorAndStatus(User creator, Status status) {
@@ -78,10 +79,11 @@ public class ProductService {
 
 	/**
 	 * Method that approve a pending product
-	 * @param p
+	 * @param p Product
+	 * @param user User
 	 */
 	public void approve(Product p, User user) {
-		checkUser(user);
+		ValidationUtils.checkCreator(user);
 		checkProductToApproveOrReject(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.APPROVED);
@@ -91,12 +93,13 @@ public class ProductService {
 
 	/**
 	 * Method that reject a pending product
-	 * @param p
-	 * @param reason
+	 * @param p Product
+	 * @param reason String
+	 * @param user User
 	 */
 	public void reject(Product p, String reason, User user) {
-		checkUser(user);
-		checkProductToApproveOrReject(p);
+		ValidationUtils.checkCreator(user);
+		ValidationUtils.(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.REJECTED);
 			productRepo.delete(product);
@@ -106,26 +109,26 @@ public class ProductService {
 
 	/**
 	 * Method that add content to a product
-	 * @param c
-	 * @param productId
+	 * @param c Content
+	 * @param productId Long
 	 */
 	public void addContentToProduct(Content c, Long productId) {
 		checkContent(c);
-		checkProduct(productId);
 		productRepo.findById(productId).ifPresent(product -> {
 			product.setContent(c);
             productRepo.save(product);
 		});
 	}
 
-//	/**
-//	 *
-//	 * @param c
-//	 */
-//	public Content rejectContent(Content c) {
-//		// TODO - implement ProductService.rejectContent
-//		throw new UnsupportedOperationException();
-//	}
+	/**
+	 *Method to reject a content
+	 * @param c Content
+	 * @return c Content
+	 */
+	public Content rejectContent(Content c) {
+		System.out.println("Content rejected...");
+		return c;
+	}
 
 	private void checkCreator(User creator) {
         if(creator == null || creator.getId() == null){
@@ -146,14 +149,14 @@ public class ProductService {
         if(p == null || p.getId() == null || p.getStatus()!= Status.PENDING){
             throw new IllegalArgumentException("Product must not be null, must have a non-null ID and status PENDING");
         }
-		checkProduct(p.getId());
+//		checkProduct(p.getId());
     }
 
-	private void checkProduct(Long id) {
-		if(productRepo.findById(id).isEmpty()) {
-			throw new IllegalArgumentException("Product not found");
-		}
-	}
+//	private void checkProduct(Long id) {
+//		if(productRepo.findById(id).isEmpty()) {
+//			throw new IllegalArgumentException("Product not found");
+//		}
+//	}
 
 	private void checkContent(Content c) {
         if(c == null){

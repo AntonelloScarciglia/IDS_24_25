@@ -29,6 +29,7 @@ public class Bundle implements Subject {
     }
 
     /**
+     * Method to add a product into this bundle
      * @param p
      */
     public void addProduct(Product p) {
@@ -36,34 +37,11 @@ public class Bundle implements Subject {
     }
 
     /**
+     * Method to remove the product from this bundle
      * @param p
      */
     public void removeProduct(Product p) {
         products.remove(p);
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     @Override
@@ -79,7 +57,53 @@ public class Bundle implements Subject {
     @Override
     public void notifyObservers() {
         for (Observer o : observers) {
-            o.update();
+            o.update(this);
         }
     }
+
+    //Getters and setters methods
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
 }
