@@ -1,6 +1,6 @@
 package it.cs.unicam.ids.filiera.domainModel.Users;
 
-import java.util.Set;
+import java.util.Collections;
 
 public class User {
     private String id;
@@ -18,7 +18,7 @@ public class User {
      * @return id
      */
     public String getId(){
-        return this.id;
+        return this.id = id;
     }
 
     /**

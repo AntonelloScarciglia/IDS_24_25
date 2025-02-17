@@ -3,8 +3,7 @@ package it.cs.unicam.ids.filiera.domainModel;
 public interface Observer {
 
 	/**
-	 * 
-	 * @param s
+	 * Method that permit Observer to update the subject
 	 */
-	public void update();
+	public void update(Subject subject);
 }
