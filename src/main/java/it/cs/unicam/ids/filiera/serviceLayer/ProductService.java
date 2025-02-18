@@ -51,7 +51,7 @@ public class ProductService {
 	 * @return List of all products of the specified owner
 	 */
 	public List<Product> filterByCreator(User creator) {
-		checkUser(creator);
+		ValidationUtils.checkUser(creator);
 		return (List<Product>) productRepo.findAllProductsById(creator.getId());
 	}
 
@@ -61,7 +61,7 @@ public class ProductService {
 	 * @return List of all products of the specified status
 	 */
 	public List<Product> filterByStatus(Status status) {
-		checkStatus(status);
+		ValidationUtils.checkStatus(status);
 		return (List<Product>) productRepo.findAllProductsByStatus(status);
 	}
 
@@ -72,8 +72,8 @@ public class ProductService {
 	 * @return List of all products of the specified creator and the specified status
 	 */
 	public List<Product> filterByCreatorAndStatus(User creator, Status status) {
-		checkUser(creator);
-		checkStatus(status);
+		ValidationUtils.checkUser(creator);
+		ValidationUtils.checkStatus(status);
 		return (List<Product>) productRepo.findAllProductsByCreatorAndStatus(creator.getId(), status);
 	}
 
@@ -84,7 +84,7 @@ public class ProductService {
 	 */
 	public void approve(Product p, User user) {
 		ValidationUtils.checkCreator(user);
-		checkProductToApproveOrReject(p);
+		ValidationUtils.checkProductToApproveOrReject(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.APPROVED);
 			productRepo.save(product);
@@ -99,7 +99,7 @@ public class ProductService {
 	 */
 	public void reject(Product p, String reason, User user) {
 		ValidationUtils.checkCreator(user);
-		ValidationUtils.(p);
+		ValidationUtils.checkProductToApproveOrReject(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.REJECTED);
 			productRepo.delete(product);
@@ -113,7 +113,7 @@ public class ProductService {
 	 * @param productId Long
 	 */
 	public void addContentToProduct(Content c, Long productId) {
-		checkContent(c);
+		ValidationUtils.checkContent(c);
 		productRepo.findById(productId).ifPresent(product -> {
 			product.setContent(c);
             productRepo.save(product);
@@ -128,45 +128,5 @@ public class ProductService {
 	public Content rejectContent(Content c) {
 		System.out.println("Content rejected...");
 		return c;
-	}
-
-	private void checkCreator(User creator) {
-        if(creator == null || creator.getId() == null){
-			throw new NullPointerException("Creator must not be null");
-		}
-		if(creator.getRole().equals(Role.ADMIN) || creator.getRole().equals(Role.CURATOR) || creator.getRole().equals(Role.ANIMATOR)){
-			throw new IllegalArgumentException("User must be a producer, a transformer or a distributor");
-		}
-    }
-
-	private void checkStatus(Status status) {
-        if(status == null){
-			throw new NullPointerException("Status must not be null");
-		}
-    }
-
-	private void checkProductToApproveOrReject(Product p) {
-        if(p == null || p.getId() == null || p.getStatus()!= Status.PENDING){
-            throw new IllegalArgumentException("Product must not be null, must have a non-null ID and status PENDING");
-        }
-//		checkProduct(p.getId());
-    }
-
-//	private void checkProduct(Long id) {
-//		if(productRepo.findById(id).isEmpty()) {
-//			throw new IllegalArgumentException("Product not found");
-//		}
-//	}
-
-	private void checkContent(Content c) {
-        if(c == null){
-            throw new NullPointerException("Content must not be null");
-        }
-    }
-
-	private void checkUser(User user){
-		if(!(user.getRole().equals(Role.CURATOR))){
-			throw new IllegalArgumentException("User must be a curator");
-		}
 	}
 }
