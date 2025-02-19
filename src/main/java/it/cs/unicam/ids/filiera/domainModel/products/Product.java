@@ -5,7 +5,9 @@ import it.cs.unicam.ids.filiera.domainModel.Subject;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
 
 import it.cs.unicam.ids.filiera.util.Status;
+import it.cs.unicam.ids.filiera.util.ValidationUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,11 +21,11 @@ public class Product implements Subject {
 	private String name;
 	private String category;
 	private Status status;
-	private Content content;
 	private List<Phase> supplyChain;
 	private User owner;
 	private double price;
 	private int quantity;
+	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date expiryDate;
 	private List<Observer> observers;
 
@@ -32,18 +34,17 @@ public class Product implements Subject {
 	 * @param id
 	 * @param name
 	 * @param category
-	 * @param supplyChain
+	 * @param status
 	 * @param owner
 	 * @param price
 	 * @param quantity
 	 * @param expiryDate
 	 */
-	public Product(Long id, String name, String category, Status status, Content content, List<Phase> supplyChain, User owner, double price, int quantity, Date expiryDate ) {
+	public Product(Long id, String name, String category, Status status, User owner, double price, int quantity, Date expiryDate ) {
 		this.id = id;
 		this.name = name;
 		this.category = category;
 		this.status = status;
-		this.content = content;
 		this.supplyChain = new ArrayList<>();
 		this.owner = owner;
 		this.price = price;
@@ -57,6 +58,7 @@ public class Product implements Subject {
 	 * @param p
 	 */
 	public void addPhase(Phase p) {
+		ValidationUtils.checkPhaseToAdd(this.supplyChain, p);
 		supplyChain.add(p);
 		notifyObservers();
 	}
@@ -66,6 +68,7 @@ public class Product implements Subject {
 	 * @param p
 	 */
 	public void removePhase(Phase p) {
+		ValidationUtils.checkPhaseIfPresent(this.supplyChain, p);
 		supplyChain.remove(p);
 		notifyObservers();
 	}
@@ -92,9 +95,15 @@ public class Product implements Subject {
 		}
 	}
 
+
+
 	/**
 	 * Getter and Setter methods
 	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -117,14 +126,6 @@ public class Product implements Subject {
 
 	public void setStatus(Status status) {
 		this.status = status;
-	}
-
-	public Content getContent() {
-		return content;
-	}
-
-	public void setContent(Content content) {
-		this.content = content;
 	}
 
 	public void setCategory(String category) {
