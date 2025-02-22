@@ -12,8 +12,8 @@ import it.cs.unicam.ids.filiera.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -38,11 +38,37 @@ public class ProductService {
 	}
 
 	/**
-     * method to save a product in the repository
-     * @param product Product
+     * method to create a product in the repository
+     * @param name
+	 * @param owner
+	 * @param quantity
+	 * @param price
+	 * @param expiryDate
      */
-	public void saveProduct(Product product) {
-		productRepo.save(product);
+	public Product createProduct(String name, User owner, int quantity, Double price, Date expiryDate) {
+		ValidationUtils.checkCreator(owner);
+		//TODO ALTRI CHECK
+		Product product = new Product(name, price, owner, expiryDate, null, Status.PENDING, quantity);
+        return productRepo.save(product);
+
+		/*
+		ValidationUtils.checkCreator(user);
+		Scanner scanner = new Scanner(System.in)
+		System.out.println("Creazione Prodotto");
+		System.out.println("Inserisci il nome del prodotto: ");
+		String name = scanner.nextLine();
+		System.out.println("Inserisci la quantità del prodotto: ");
+		int quantity = scanner.nextInt();
+		System.out.println("Inserisci il prezzo del prodotto: ");
+		double price = scanner.nextDouble();
+		System.out.println("Inserisci la categoria del prodotto: ");
+		String category = scanner.next();
+		System.out.println("Inserisci la data di scadenza del prodotto (gg/mm/aaaa): ");
+		String expiryDate = scanner.next();
+		scanner.close();
+		Product product = new Product(name, price, user, LocalDate.parse(expiryDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")), category, Status.PENDING, quantity);
+		return productRepo.save(product);
+		 */
 	}
 
 	/**
@@ -89,12 +115,13 @@ public class ProductService {
 	 * @throws IllegalArgumentException if product is null, had a null id or is not in pending state
 	 */
 	public void approve(Product p, User user) {
-		ValidationUtils.checkUser(user);
-		ValidationUtils.checkProductToApproveOrReject(p);
+		ValidationUtils.checkCurator(user);
+		ValidationUtils.checkPending(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.APPROVED);
 			productRepo.save(product);
 		});
+		System.out.println("Product: " + p.getName() + " approved successfully ");
 	}
 
 	/**
@@ -107,13 +134,13 @@ public class ProductService {
 	 * @throws IllegalArgumentException if product is null, had a null id or is not in pending state
 	 */
 	public void reject(Product p, String reason, User user) {
-		ValidationUtils.checkCreator(user);
-		ValidationUtils.checkProductToApproveOrReject(p);
+		ValidationUtils.checkCurator(user);
+		ValidationUtils.checkPending(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.REJECTED);
 			productRepo.delete(product);
 		});
-		System.out.println("Reason of the rejection :" + reason);
+		System.out.println("Product: " + p.getName() + " rejected successfully" + "\nReason of the rejection :" + reason);
 	}
 
 	/**
@@ -126,7 +153,7 @@ public class ProductService {
 		//TODO
 		ValidationUtils.checkContent(c);
 		productRepo.findById(productId).ifPresent(product -> {
-			product.getSupplyChain().stream().forEach(phase -> phase.getApprovedContent().add(c)); //setContent(c);
+			product.getSupplyChain().forEach(phase -> phase.getApprovedContent().add(c)); //setContent(c);
             productRepo.save(product);
 		});
 	}

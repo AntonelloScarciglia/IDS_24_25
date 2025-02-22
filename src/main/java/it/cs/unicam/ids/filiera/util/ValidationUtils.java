@@ -2,9 +2,7 @@ package it.cs.unicam.ids.filiera.util;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.Role;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
-import it.cs.unicam.ids.filiera.domainModel.products.Content;
-import it.cs.unicam.ids.filiera.domainModel.products.Phase;
-import it.cs.unicam.ids.filiera.domainModel.products.Product;
+import it.cs.unicam.ids.filiera.domainModel.products.*;
 
 import java.util.List;
 
@@ -44,21 +42,27 @@ public final class ValidationUtils {
     }
 
     /**
-     * Method to validate the product for the approvation/rejection
+     * Method to validate the product
      * @param p
-     * @throws IllegalArgumentException if product is null, had a null id or is not in pending state
+     * @throws NullPointerException if product is not valid
      */
-    public static void checkProductToApproveOrReject(Product p) {
-        if(p == null || p.getId() == null || p.getStatus()!= Status.PENDING){
-            throw new IllegalArgumentException("Product must not be null, must have a non-null ID and status PENDING");
+    public static <T,E extends CatalogableItem> void checkProduct(E entity){
+        if(entity == null || entity.getId() == null){
+            throw new NullPointerException("Product must not be null, must have a non-null ID");
         }
     }
 
-//    public static void checkProductIfPresent(ProductRepository productRepo, Long id) {
-//        if(productRepo.findById(id).isEmpty()) {
-//            throw new IllegalArgumentException("Product not found");
-//        }
-//    }
+    /**
+     * Method to check if a product is already present
+     * @param product
+     * @param bundle
+     * @throws IllegalArgumentException if the product is already present in the bundle
+     */
+    public static void checkProductIfPresentInBundle(Product product, Bundle bundle){
+        if(bundle.getProducts().contains(product)){
+            throw new IllegalArgumentException("Product already present in the bundle");
+        }
+    }
 
     /**
      * Method to validate the content of the product
@@ -76,7 +80,7 @@ public final class ValidationUtils {
      * @param user
      * @throws IllegalArgumentException if user is not a curator
      */
-    public static void checkUser(User user){
+    public static void checkCurator(User user){
         if(user == null || !(user.getRole().equals(Role.CURATOR))){
             throw new IllegalArgumentException("User must be a curator");
         }
@@ -116,6 +120,31 @@ public final class ValidationUtils {
     public static void checkPhase(Phase p) {
         if(p == null){
             throw new NullPointerException("Phase must not be null");
+        }
+    }
+
+    /**
+     * Method to check if the bundle does not contain the product for the remove
+     * @param product
+     * @param bundle
+     * @throws IllegalArgumentException if bundle does not contain the product
+     */
+    public static void checkProductIfAbsence(Product product, Bundle bundle) {
+        if(!(bundle.getProducts().contains(product))){
+            throw new IllegalArgumentException("Product is not present in the bundle");
+        }
+    }
+
+    /**
+     * Method to check if the product/bundle is null and if is not in pending status
+     * @param entity
+     * @param <T>
+     * @param <E> extends CatalogableItem
+     * @throws IllegalArgumentException if entity is null, had a null id or is not in pending status
+     */
+    public static <T, E extends CatalogableItem> void checkPending (E entity){
+        if(entity == null || entity.getId() == null || entity.getStatus()!= Status.PENDING){
+            throw new IllegalArgumentException("Entity must be not null, with a not null id and in pending state to be approved");
         }
     }
 }

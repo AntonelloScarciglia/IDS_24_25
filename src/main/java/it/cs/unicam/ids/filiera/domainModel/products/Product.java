@@ -6,32 +6,18 @@ import it.cs.unicam.ids.filiera.domainModel.Users.User;
 
 import it.cs.unicam.ids.filiera.util.Status;
 import it.cs.unicam.ids.filiera.util.ValidationUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-//@Document(collection = "products")
-public class Product implements Subject {
+public class Product extends CatalogableItem implements Subject  {
 
-	@Id
-	private Long id;
-	private String name;
-	private String category;
-	private Status status;
-	private List<Phase> supplyChain;
-	private User owner;
-	private double price;
 	private int quantity;
-	@DateTimeFormat(pattern = "dd-MM-yyyy")
-	private Date expiryDate;
-	private List<Observer> observers;
+	private String category;
+	private List<Phase> supplyChain;
 
 	/**
 	 * Construct of the Product class
-	 * @param id
 	 * @param name
 	 * @param category
 	 * @param status
@@ -40,17 +26,10 @@ public class Product implements Subject {
 	 * @param quantity
 	 * @param expiryDate
 	 */
-	public Product(Long id, String name, String category, Status status, User owner, double price, int quantity, Date expiryDate ) {
-		this.id = id;
-		this.name = name;
+	public Product(String name, Double price, User owner, Date expiryDate, String category, Status status, int quantity) {
+		super(name, price, owner, expiryDate, status);
 		this.category = category;
-		this.status = status;
-		this.supplyChain = new ArrayList<>();
-		this.owner = owner;
-		this.price = price;
 		this.quantity = quantity;
-		this.expiryDate = expiryDate;
-		this.observers = new ArrayList<>();
 	}
 
 	/**
@@ -78,54 +57,28 @@ public class Product implements Subject {
 	 */
 	@Override
 	public void attach(Observer o) {
-		if(observers.contains(o)){
-			observers.add(o);
+		if(getObservers().contains(o)){
+			getObservers().add(o);
 		}
 	}
 
 	@Override
 	public void detach(Observer o) {
-		observers.remove(o);
+		getObservers().remove(o);
 	}
 
 	@Override
 	public void notifyObservers() {
-		for(Observer observer : observers){
+		for(Observer observer : getObservers()){
 			observer.update(this);
 		}
 	}
 
-
-
 	/**
 	 * Getter and Setter methods
 	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getCategory() {
 		return category;
-	}
-
-	public Status getStatus() {
-		return status;
-	}
-
-	public void setStatus(Status status) {
-		this.status = status;
 	}
 
 	public void setCategory(String category) {
@@ -140,22 +93,6 @@ public class Product implements Subject {
 		this.supplyChain = supplyChain;
 	}
 
-	public User getOwner() {
-		return owner;
-	}
-
-	public void setOwner(User owner) {
-		this.owner = owner;
-	}
-
-	public double getPrice() {
-		return price;
-	}
-
-	public void setPrice(double price) {
-		this.price = price;
-	}
-
 	public int getQuantity() {
 		return quantity;
 	}
@@ -164,19 +101,18 @@ public class Product implements Subject {
 		this.quantity = quantity;
 	}
 
-	public Date getExpiryDate() {
-		return expiryDate;
-	}
-
-	public void setExpiryDate(Date expiryDate) {
-		this.expiryDate = expiryDate;
-	}
-
-	public List<Observer> getObservers() {
-		return observers;
-	}
-
-	public void setObservers(List<Observer> observers) {
-		this.observers = observers;
+	@Override
+	public String getInfo() {
+		return "Product{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", owner=" + owner +
+				", status=" + status +
+				", price=" + price +
+				", quantity=" + quantity +
+				", expiryDate=" + expiryDate +
+				", category='" + category + '\'' +
+				", supplyChain=" + supplyChain +
+				'}';
 	}
 }

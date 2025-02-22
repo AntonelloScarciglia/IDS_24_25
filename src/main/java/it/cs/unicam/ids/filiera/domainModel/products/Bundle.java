@@ -4,28 +4,23 @@ import it.cs.unicam.ids.filiera.domainModel.Observer;
 import it.cs.unicam.ids.filiera.domainModel.Subject;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
 import it.cs.unicam.ids.filiera.util.Status;
+import it.cs.unicam.ids.filiera.util.ValidationUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Bundle implements Subject {
+public class Bundle extends CatalogableItem implements Subject {
 
     private final List<Product> products;
-    private Long id;
-    private User owner;
-    private double price;
     private int quantity;
-    private Date expiryDate;
-    private final List<Observer> observers = new ArrayList<>();
-    private Status status;
 
-    public Bundle(List<Product> products, User owner, double price, int quantity, Date expiryDate) {
+    public Bundle(String name, Double price, User owner, Date expiryDate, List<Product> products, int quantity, Status status) {
+        super(name, price, owner, expiryDate, status);
         this.products = products;
-        this.owner = owner;
-        this.price = price;
         this.quantity = quantity;
-        this.expiryDate = expiryDate;
     }
 
     /**
@@ -33,7 +28,10 @@ public class Bundle implements Subject {
      * @param p
      */
     public void addProduct(Product p) {
+        ValidationUtils.checkProduct(p);
+        ValidationUtils.checkProductIfPresentInBundle(p, this);
         products.add(p);
+        System.out.println("Adding product successfully");
     }
 
     /**
@@ -41,22 +39,25 @@ public class Bundle implements Subject {
      * @param p
      */
     public void removeProduct(Product p) {
+        ValidationUtils.checkProduct(p);
+        ValidationUtils.checkProductIfAbsence(p, this);
         products.remove(p);
+        System.out.println("Removing product successfully");
     }
 
     @Override
     public void attach(Observer o) {
-        this.observers.add(o);
+        this.getObservers().add(o);
     }
 
     @Override
     public void detach(Observer o) {
-        this.observers.remove(o);
+        this.getObservers().remove(o);
     }
 
     @Override
     public void notifyObservers() {
-        for (Observer o : observers) {
+        for (Observer o : getObservers()) {
             o.update(this);
         }
     }
@@ -66,20 +67,8 @@ public class Bundle implements Subject {
         return products;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public double getPrice() {
-        return price;
     }
 
     public void setQuantity(int quantity) {
@@ -90,20 +79,17 @@ public class Bundle implements Subject {
         return quantity;
     }
 
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    @Override
+    public String getInfo() {
+        return "Bundle{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", products=" + products +
+                ", owner=" + owner +
+                ", status=" + status +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                ", expiryDate=" + expiryDate +
+                '}';
     }
-
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
 }
