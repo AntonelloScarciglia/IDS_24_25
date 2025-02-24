@@ -3,12 +3,16 @@ package it.cs.unicam.ids.filiera.domainModel.products;
 import java.util.Date;
 
 public class AgriculturalPhase extends Phase {
-    public AgriculturalPhase(Date start, Date end, Location loc) {
-        super(start, end, loc);
+    public AgriculturalPhase(Date start, Date end, SupplyChainPoint location) {
+        super(start, end, location);
     }
 
+    /**
+     * Method to get the information of the phase
+     * @return String
+     */
     @Override
     public String getPhaseInfo() {
-        return null;
+        return "Agricultural Phase";
     }
 }

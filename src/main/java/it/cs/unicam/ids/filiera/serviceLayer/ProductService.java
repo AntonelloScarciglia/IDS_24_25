@@ -1,6 +1,7 @@
 package it.cs.unicam.ids.filiera.serviceLayer;
 
-import it.cs.unicam.ids.filiera.domainModel.Users.User;
+import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
+import it.cs.unicam.ids.filiera.domainModel.products.CatalogItem;
 import it.cs.unicam.ids.filiera.domainModel.products.Content;
 import it.cs.unicam.ids.filiera.domainModel.products.Product;
 
@@ -21,38 +22,22 @@ public class ProductService {
 	private ProductRepository productRepo;
 
 	/**
-     * method to retrieve all products from the repository
-     * @return List of all products
-     */
-    public List<Product> getAllProducts() {
-        return (List<Product>) productRepo.findAll();
-    }
-
-	/**
-	 * method to retrieve a products from the repository
-	 * @param id Long
-	 * @return Product
+	 * method to create a product in the repository
+	 * @param name String
+	 * @param owner AuthUser
+	 * @param quantity Int
+	 * @param price Double
+	 * @param expiryDate Date
+	 * @param category String
 	 */
-	public Product getProduct(Long id){
-		return productRepo.findById(id).orElse(null);
-	}
-
-	/**
-     * method to create a product in the repository
-     * @param name
-	 * @param owner
-	 * @param quantity
-	 * @param price
-	 * @param expiryDate
-     */
-	public Product createProduct(String name, User owner, int quantity, Double price, Date expiryDate) {
+	public Product createProduct(String name, AuthUser owner, int quantity, Double price, Date expiryDate, String category) {
 		ValidationUtils.checkCreator(owner);
 		//TODO ALTRI CHECK
-		Product product = new Product(name, price, owner, expiryDate, null, Status.PENDING, quantity);
-        return productRepo.save(product);
+		Product product = new Product(name, price, owner, expiryDate, Status.PENDING, quantity, category);
+		return productRepo.save(product);
 
 		/*
-		ValidationUtils.checkCreator(user);
+		ValidationUtils.checkCreator(AuthUser);
 		Scanner scanner = new Scanner(System.in)
 		System.out.println("Creazione Prodotto");
 		System.out.println("Inserisci il nome del prodotto: ");
@@ -66,19 +51,27 @@ public class ProductService {
 		System.out.println("Inserisci la data di scadenza del prodotto (gg/mm/aaaa): ");
 		String expiryDate = scanner.next();
 		scanner.close();
-		Product product = new Product(name, price, user, LocalDate.parse(expiryDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")), category, Status.PENDING, quantity);
+		Product product = new Product(name, price, AuthUser, LocalDate.parse(expiryDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")), category, Status.PENDING, quantity);
 		return productRepo.save(product);
 		 */
 	}
 
 	/**
+	 * Method to remove a product from the repository
+	 * @param product Product
+	 */
+	public void deleteProduct(Product product){
+		productRepo.delete(product);
+	}
+
+	/**
 	 * Method to retrieve all products from the repository about the specified owner
-	 * @param creator User
+	 * @param creator AuthUser
 	 * @return List of all products of the specified owner
 	 * @throws NullPointerException if creator is null
 	 * @throws IllegalArgumentException if creator is not a producer, transformer or distributor
 	 */
-	public List<Product> filterByCreator(User creator) {
+	public List<Product> filterByCreator(AuthUser creator) {
 		ValidationUtils.checkCreator(creator);
 		return productRepo.findAllProductsByOwner(creator);
 	}
@@ -96,12 +89,12 @@ public class ProductService {
 
 	/**
 	 * Method to retrieve all products from a specified creator and a specified status
-	 * @param creator User
+	 * @param creator AuthUser
 	 * @param status Status
 	 * @return List of all products of the specified creator and the specified status
 	 * @throws IllegalArgumentException if the creator or status parameters are invalid
 	 */
-	public List<Product> filterByCreatorAndStatus(User creator, Status status) {
+	public List<Product> filterByCreatorAndStatus(AuthUser creator, Status status) {
 		ValidationUtils.checkCreator(creator);
 		ValidationUtils.checkStatus(status);
 		return productRepo.findAllProductsByOwnerAndStatus(creator, status);
@@ -110,12 +103,12 @@ public class ProductService {
 	/**
 	 * Method that approve a pending product
 	 * @param p Product
-	 * @param user User
-	 * @throws IllegalArgumentException if user is null
+	 * @param AuthUser AuthUser
+	 * @throws IllegalArgumentException if AuthAuthUser is null
 	 * @throws IllegalArgumentException if product is null, had a null id or is not in pending state
 	 */
-	public void approve(Product p, User user) {
-		ValidationUtils.checkCurator(user);
+	public void approve(Product p, AuthUser AuthUser) {
+		ValidationUtils.checkCurator(AuthUser);
 		ValidationUtils.checkPending(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.APPROVED);
@@ -128,13 +121,13 @@ public class ProductService {
 	 * Method that reject a pending product
 	 * @param p Product
 	 * @param reason String
-	 * @param user User
-	 * @throws NullPointerException if user is null
+	 * @param AuthUser AuthUser
+	 * @throws NullPointerException if AuthUser is null
 	 * @throws IllegalArgumentException if creator is not a producer, transformer or distributor
 	 * @throws IllegalArgumentException if product is null, had a null id or is not in pending state
 	 */
-	public void reject(Product p, String reason, User user) {
-		ValidationUtils.checkCurator(user);
+	public void reject(Product p, String reason, AuthUser AuthUser) {
+		ValidationUtils.checkCurator(AuthUser);
 		ValidationUtils.checkPending(p);
 		productRepo.findById(p.getId()).ifPresent(product -> {
 			product.setStatus(Status.REJECTED);
@@ -150,11 +143,11 @@ public class ProductService {
 	 * @throws NullPointerException if content is null
 	 */
 	public void addContentToProduct(Content c, Long productId) {
-		//TODO
 		ValidationUtils.checkContent(c);
 		productRepo.findById(productId).ifPresent(product -> {
-			product.getSupplyChain().forEach(phase -> phase.getApprovedContent().add(c)); //setContent(c);
-            productRepo.save(product);
+			product.getSupplyChain().forEach(phase -> {
+				phase.addContent(c);
+			});
 		});
 	}
 
@@ -164,8 +157,71 @@ public class ProductService {
 	 * @return c Content
 	 */
 	public Content rejectContent(Content c) {
-		//TODO
+		productRepo.findAll().forEach(product -> {
+			product.getSupplyChain().forEach(phase -> {
+				phase.getPendingContent().remove(c);
+			});
+		});
 		System.out.println("Content rejected...");
 		return c;
 	}
+
+	/**
+	 * method to retrieve all products from the repository
+	 * @return List of all products
+	 */
+	public List<Product> getAllProducts() {
+		return (List<Product>) productRepo.findAll();
+	}
+
+	/**
+	 * method to retrieve a products from the repository
+	 * @param id Long
+	 * @return Product
+	 */
+	public Product getProduct(Long id){
+		return productRepo.findById(id).orElse(null);
+	}
+
+	/**
+	 * method to save a product in the repository
+	 * @param product Product
+	 */
+	public void saveProduct(Product product){
+		productRepo.save(product);
+	}
+
+	/**
+	 * Method to retrieve the info about a product
+	 * @param catalogItem C extends CatalogItem
+	 * @return String with the info about the product
+	 */
+	public  <C extends CatalogItem> String toStringProductInfo(C catalogItem){
+		return catalogItem.getInfo();
+	}
+
+	/*
+	public <C extends CatalogItem> void save(C catalogItem){
+		productRepo.save(catalogItem);
+	}*/
+
+	/*
+	public <C extends CatalogItem> C remove(C catalogItem){
+		if(catalogItem instanceof Product){
+			productRepo.delete((Product) catalogItem);
+		}
+		else{
+            throw new IllegalArgumentException("The object is not a Product");
+        }
+		return catalogItem;
+	}*/
+
+
+
+
+
+
+
+
+
 }

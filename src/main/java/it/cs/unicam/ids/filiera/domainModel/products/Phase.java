@@ -6,49 +6,55 @@ import java.util.List;
 
 public abstract class Phase {
 
-	private Date start;
-	private Date end;
-	private Location loc;
-	private User involvedUser;
-	private List<Content> approvedContent;
-	private List<Content> pendingContent;
-	private String note;
+    private Date start;
+    private Date end;
+    private SupplyChainPoint location;
 
-	public abstract String getPhaseInfo();
+    private User involvedUser;
+    private List<Content> approvedContent;
+    private List<Content> pendingContent;
+    private String note;
 
-	public Phase(Date start, Date end, Location loc) {
-		this.start = start;
-		this.end = end;
-		this.loc = loc;
-	}
 
-	public Date getStart() {
-		return start;
-	}
 
-	public Date getEnd() {
-		return end;
-	}
+    public Phase(Date start, Date end, SupplyChainPoint location) {
+        this.start = start;
+        this.end = end;
+        this.location = location;
+    }
 
-	public Location getLoc() {
-		return loc;
-	}
+    public Date getStart() {
+        return start;
+    }
 
-	public User getInvolvedUser() {
-		return involvedUser;
-	}
+    public Date getEnd() {
+        return end;
+    }
 
-	public List<Content> getApprovedContent() {
-		return approvedContent;
-	}
+    public SupplyChainPoint getLocation() {
+        return location;
+    }
 
-	public List<Content> getPendingContent() {
-		return pendingContent;
-	}
+    public User getInvolvedUser() {
+        return involvedUser;
+    }
 
-	public String getNote() {
-		return note;
-	}
+    public List<Content> getApprovedContent() {
+        return approvedContent;
+    }
 
+    public void addContent(Content content){
+        pendingContent.add(content);
+    }
+
+    public List<Content> getPendingContent() {
+        return pendingContent;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public abstract String getPhaseInfo();
 
 }

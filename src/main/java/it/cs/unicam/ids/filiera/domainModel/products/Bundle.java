@@ -1,7 +1,6 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
-import it.cs.unicam.ids.filiera.domainModel.Observer;
-import it.cs.unicam.ids.filiera.domainModel.Subject;
+import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
 import it.cs.unicam.ids.filiera.util.Status;
 import it.cs.unicam.ids.filiera.util.ValidationUtils;
@@ -12,12 +11,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Bundle extends CatalogableItem implements Subject {
+public class Bundle extends CatalogItem {
 
     private final List<Product> products;
     private int quantity;
 
-    public Bundle(String name, Double price, User owner, Date expiryDate, List<Product> products, int quantity, Status status) {
+    public Bundle(String name, Double price, AuthUser owner, Date expiryDate, List<Product> products, int quantity, Status status) {
         super(name, price, owner, expiryDate, status);
         this.products = products;
         this.quantity = quantity;
@@ -44,24 +43,6 @@ public class Bundle extends CatalogableItem implements Subject {
         products.remove(p);
         System.out.println("Removing product successfully");
     }
-
-    @Override
-    public void attach(Observer o) {
-        this.getObservers().add(o);
-    }
-
-    @Override
-    public void detach(Observer o) {
-        this.getObservers().remove(o);
-    }
-
-    @Override
-    public void notifyObservers() {
-        for (Observer o : getObservers()) {
-            o.update(this);
-        }
-    }
-
     //Getters and setters methods
     public List<Product> getProducts() {
         return products;

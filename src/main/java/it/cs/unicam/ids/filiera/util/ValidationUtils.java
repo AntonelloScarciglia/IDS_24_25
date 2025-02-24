@@ -1,6 +1,6 @@
 package it.cs.unicam.ids.filiera.util;
 
-import it.cs.unicam.ids.filiera.domainModel.Users.Role;
+import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
 import it.cs.unicam.ids.filiera.domainModel.products.*;
 
@@ -21,12 +21,12 @@ public final class ValidationUtils {
      * @throws NullPointerException if creator is null
      * @throws IllegalArgumentException if creator is not a producer, transformer or Distributor
      */
-    public static void checkCreator(User creator) {
+    public static void checkCreator(AuthUser creator) {
         if(creator == null || creator.getId() == null){
             throw new NullPointerException("Creator must not be null");
         }
         if(creator.getRole().equals(Role.ADMIN) || creator.getRole().equals(Role.CURATOR) || creator.getRole().equals(Role.ANIMATOR)){
-            throw new IllegalArgumentException("User must be a producer, a transformer or a distributor");
+            throw new IllegalArgumentException("AuthUser must be a producer, a transformer or a distributor");
         }
     }
 
@@ -43,10 +43,10 @@ public final class ValidationUtils {
 
     /**
      * Method to validate the product
-     * @param p
+     * @param entity
      * @throws NullPointerException if product is not valid
      */
-    public static <T,E extends CatalogableItem> void checkProduct(E entity){
+    public static <E extends CatalogItem> void checkProduct(E entity){
         if(entity == null || entity.getId() == null){
             throw new NullPointerException("Product must not be null, must have a non-null ID");
         }
@@ -76,12 +76,12 @@ public final class ValidationUtils {
     }
 
     /**
-     * Method to validate the role of a user (must be a Curator)
-     * @param user
-     * @throws IllegalArgumentException if user is not a curator
+     * Method to validate the role of a AuthUser (must be a Curator)
+     * @param AuthUser
+     * @throws IllegalArgumentException if AuthUser is not a curator
      */
-    public static void checkCurator(User user){
-        if(user == null || !(user.getRole().equals(Role.CURATOR))){
+    public static void checkCurator(AuthUser AuthUser){
+        if(AuthUser == null || !(AuthUser.getRole().equals(Role.CURATOR))){
             throw new IllegalArgumentException("User must be a curator");
         }
     }
@@ -138,11 +138,10 @@ public final class ValidationUtils {
     /**
      * Method to check if the product/bundle is null and if is not in pending status
      * @param entity
-     * @param <T>
      * @param <E> extends CatalogableItem
      * @throws IllegalArgumentException if entity is null, had a null id or is not in pending status
      */
-    public static <T, E extends CatalogableItem> void checkPending (E entity){
+    public static <E extends CatalogItem> void checkPending (E entity){
         if(entity == null || entity.getId() == null || entity.getStatus()!= Status.PENDING){
             throw new IllegalArgumentException("Entity must be not null, with a not null id and in pending state to be approved");
         }

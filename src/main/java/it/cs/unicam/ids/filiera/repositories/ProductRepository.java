@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface ProductRepository extends CrudRepository<Product, Long> {
-    List<Product> findAllProductsByOwner (User creator);
-    List<Product> findAllProductsByStatus (Status status);
+    List<Product> findAllProductsByOwner(User creator);
+    List<Product> findAllProductsByStatus(Status status);
     List<Product> findAllProductsByOwnerAndStatus(User creator, Status status);
 }

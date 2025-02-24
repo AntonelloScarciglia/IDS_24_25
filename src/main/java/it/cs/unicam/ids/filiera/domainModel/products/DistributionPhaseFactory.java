@@ -5,14 +5,14 @@ import java.util.Date;
 public class DistributionPhaseFactory extends PhaseFactory {
 
 	/**
-	 * 
+	 * Method to create a new DistributionPhase
 	 * @param start
 	 * @param end
-	 * @param loc
+	 * @param location
+	 * @return Phase DistributionPhase
 	 */
-	public Phase create(Date start, Date end, Location loc) {
-		// TODO - implement DistributionPhaseFactory.create
-		throw new UnsupportedOperationException();
+	@Override
+	public Phase createPhase(Date start, Date end, SupplyChainPoint location) {
+		return new DistributionPhase(start, end, location);
 	}
-
 }
