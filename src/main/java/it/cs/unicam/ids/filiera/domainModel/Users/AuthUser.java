@@ -6,12 +6,15 @@ public class AuthUser implements User{
 
     private Long id;
     private String username;
+    private String email;
     private Role role;
 
-    public AuthUser(Long id, String username, Role role){
+    public AuthUser(Long id, String username, String email, Role role){
         this.id = id;
         this.username = username;
+        this.email = email;
         this.role = role;
+
     }
 
     public Long getId(){
@@ -26,6 +29,9 @@ public class AuthUser implements User{
         return role;
     }
 
+    public String getEmail() {
+        return email;
+    }
 
     public void showMarketplace(){
         //TODO

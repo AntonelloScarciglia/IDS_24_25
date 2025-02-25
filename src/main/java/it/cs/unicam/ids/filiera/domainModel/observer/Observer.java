@@ -1,14 +1,9 @@
 package it.cs.unicam.ids.filiera.domainModel.observer;
 
-public class Observer {
+public interface Observer {
 
 	/**
-	 * 
-	 * @param s
+	 * Method that permits Observer to update the subject
 	 */
-	public void update(Subject s) {
-		// TODO - implement Observer.update
-		throw new UnsupportedOperationException();
-	}
-
+	public void update(Subject subject);
 }

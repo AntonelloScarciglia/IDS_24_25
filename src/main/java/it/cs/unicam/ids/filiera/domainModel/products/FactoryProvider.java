@@ -12,15 +12,11 @@ public class FactoryProvider {
 	 * @return PhaseFactory instance of the phase
 	 */
 	public PhaseFactory getFactory(PhaseType type) {
-		switch (type) {
-			case AGRICULTURAL:
-				return new AgriculturalPhaseFactory();
-			case DISTRIBUTION:
-				return new DistributionPhaseFactory();
-			case TRANSFORMATION:
-				return new TransformationPhaseFactory();
-			default:
-				throw new IllegalArgumentException("Invalid phase type: " + type);
-		}
+        return switch (type) {
+            case AGRICULTURAL -> new AgriculturalPhaseFactory();
+            case DISTRIBUTION -> new DistributionPhaseFactory();
+            case TRANSFORMATION -> new TransformationPhaseFactory();
+            default -> throw new IllegalArgumentException("Invalid phase type: " + type);
+        };
 	}
 }

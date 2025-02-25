@@ -2,6 +2,7 @@ package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
+import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
 import it.cs.unicam.ids.filiera.util.ValidationUtils;
 import org.springframework.data.annotation.Id;

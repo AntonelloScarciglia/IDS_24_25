@@ -2,6 +2,7 @@ package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.domainModel.Users.User;
+import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
 
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ public class Product extends CatalogItem {
 		super(name, price, owner, expiryDate, status);
 		this.quantity = quantity;
 		this.category = category;
-		this.supplyChain = new ArrayList<Phase>();
+		this.supplyChain = new ArrayList<>();
+		this.attach(new UserObserver());
 	}
 
 

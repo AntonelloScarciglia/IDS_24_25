@@ -17,6 +17,8 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String name;
+
     private Date date;
     private List<Invite> inviteList;
     private String category;
@@ -24,8 +26,10 @@ public class Event {
     private String description;
     private Status status;
     private Date expiryDate;
+    private AuthUser creator;
 
-    public Event(Date date, List<Invite> inviteList, String category, SupplyChainPoint location, String description, Status status, Date expiryDate) {
+    public Event(String name, Date date, List<Invite> inviteList, String category, SupplyChainPoint location, String description, Status status, Date expiryDate, AuthUser creator) {
+        this.name = name;
         this.date = date;
         this.inviteList = inviteList;
         this.category = category;
@@ -33,6 +37,11 @@ public class Event {
         this.description = description;
         this.status = status;
         this.expiryDate = expiryDate;
+        this.creator = creator;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public List<AuthUser> getInvitedUsers(){
@@ -85,6 +94,10 @@ public class Event {
 
     public Date getExpiryDate() {
         return expiryDate;
+    }
+
+    public AuthUser getCreator() {
+        return creator;
     }
 
     @Override

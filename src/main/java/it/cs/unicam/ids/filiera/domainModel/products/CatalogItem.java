@@ -1,15 +1,20 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
+import it.cs.unicam.ids.filiera.domainModel.observer.Observer;
+import it.cs.unicam.ids.filiera.domainModel.observer.Subject;
+import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-public abstract class CatalogItem {
+public abstract class CatalogItem implements Subject {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,13 +25,16 @@ public abstract class CatalogItem {
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	protected Date expiryDate;
 	protected Status status;
+	private final List<Observer> observers;
 
 	public CatalogItem(String name, Double price, AuthUser owner, Date expiryDate, Status status){
 		this.name = name;
 		this.price = price;
 		this.owner = owner;
 		this.expiryDate = expiryDate;
-		this.status = status;
+		this.status = Status.PENDING;
+		this.observers = new ArrayList<>();
+		this.attach(new UserObserver());
 	}
 
 	public Long getId() {
@@ -73,10 +81,31 @@ public abstract class CatalogItem {
 		return status;
 	}
 
+	/**
+	 * When the status is set (by a curator), notify the observers.
+	 */
 	public void setStatus(Status status) {
 		this.status = status;
-		//notifyObservers();
+		notifyObservers();
 	}
+
+	@Override
+	public void attach(Observer o) {
+		observers.add(o);
+	}
+
+	@Override
+	public void detach(Observer o) {
+		observers.remove(o);
+	}
+
+	@Override
+	public void notifyObservers() {
+		for (Observer observer : observers) {
+			observer.update(this);
+		}
+	}
+
 
 	public abstract String getInfo();
 }

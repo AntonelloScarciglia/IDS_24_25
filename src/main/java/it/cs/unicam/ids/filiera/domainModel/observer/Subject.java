@@ -1,28 +1,24 @@
 package it.cs.unicam.ids.filiera.domainModel.observer;
 
-public class Subject {
+import it.cs.unicam.ids.filiera.domainModel.observer.Observer;
+
+public interface Subject {
 
 	/**
-	 * 
+	 * Method to attach a new subject to the list of object observed
 	 * @param o
 	 */
-	public void detach(Observer o) {
-		// TODO - implement Subject.detach
-		throw new UnsupportedOperationException();
-	}
-
-	public void notifyObservers() {
-		// TODO - implement Subject.notifyObservers
-		throw new UnsupportedOperationException();
-	}
+	public void attach(Observer o);
 
 	/**
-	 * 
+	 * Method to detach a subject from the list of object observed
 	 * @param o
 	 */
-	public void attach(Observer o) {
-		// TODO - implement Subject.attach
-		throw new UnsupportedOperationException();
-	}
+	public void detach(Observer o);
+
+	/**
+	 * Method to notify observers about the updated subject
+	 */
+	public void notifyObservers();
 
 }
