@@ -5,6 +5,9 @@ import it.cs.unicam.ids.filiera.domainModel.Users.User;
 import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
 import it.cs.unicam.ids.filiera.util.ValidationUtils;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import org.springframework.data.annotation.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -12,9 +15,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Bundle represents a collection of products sold together.
+ */
+@Entity
 public class Bundle extends CatalogItem {
 
-    private final List<Product> products;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Product> products;
     private int quantity;
 
     public Bundle(String name, Double price, AuthUser owner, Date expiryDate, List<Product> products, int quantity, Status status) {
@@ -23,9 +31,14 @@ public class Bundle extends CatalogItem {
         this.quantity = quantity;
     }
 
+    public Bundle() {
+
+    }
+
     /**
      * Method to add a product into this bundle
-     * @param p
+     *
+     * @param p the product to add.
      */
     public void addProduct(Product p) {
         ValidationUtils.checkProduct(p);
@@ -35,8 +48,8 @@ public class Bundle extends CatalogItem {
     }
 
     /**
-     * Method to remove the product from this bundle
-     * @param p
+     * Removes a product from the bundle.
+     * @param p the product to remove.
      */
     public void removeProduct(Product p) {
         ValidationUtils.checkProduct(p);
@@ -44,6 +57,7 @@ public class Bundle extends CatalogItem {
         products.remove(p);
         System.out.println("Removing product successfully");
     }
+
     //Getters and setters methods
     public List<Product> getProducts() {
         return products;

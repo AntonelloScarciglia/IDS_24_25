@@ -1,42 +1,37 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
-import it.cs.unicam.ids.filiera.domainModel.Users.User;
-import it.cs.unicam.ids.filiera.util.Status;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
-import javax.security.auth.callback.UnsupportedCallbackException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Entity
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-
     private Date date;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Invite> inviteList;
     private String category;
     private SupplyChainPoint location;
     private String description;
-    private Status status;
-    private Date expiryDate;
+    @OneToOne
     private AuthUser creator;
 
-    public Event(String name, Date date, List<Invite> inviteList, String category, SupplyChainPoint location, String description, Status status, Date expiryDate, AuthUser creator) {
+    public Event() {
+    }
+
+    public Event(String name, Date date, List<Invite> inviteList, String category, SupplyChainPoint location, String description, AuthUser creator) {
         this.name = name;
         this.date = date;
         this.inviteList = inviteList;
         this.category = category;
         this.location = location;
         this.description = description;
-        this.status = status;
-        this.expiryDate = expiryDate;
         this.creator = creator;
     }
 
@@ -88,13 +83,6 @@ public class Event {
         return description;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
 
     public AuthUser getCreator() {
         return creator;
@@ -109,8 +97,6 @@ public class Event {
                 ", category='" + category + '\'' +
                 ", location=" + location +
                 ", description='" + description + '\'' +
-                ", status=" + status +
-                ", expiryDate=" + expiryDate +
                 '}';
     }
 }

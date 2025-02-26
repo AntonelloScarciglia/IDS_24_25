@@ -1,12 +1,18 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+
 import java.io.File;
 import java.util.List;
-
+@Embeddable
 public class Content {
 
     private File file;
+    @ElementCollection
     private List<String> certifications;
+    @ElementCollection
+
     private List<String> cultivationMethods;
     private String description;
 
@@ -15,6 +21,10 @@ public class Content {
         this.certifications = certifications;
         this.cultivationMethods = cultivationMethods;
         this.description = description;
+    }
+
+    public Content() {
+
     }
 
     public File getFile() {

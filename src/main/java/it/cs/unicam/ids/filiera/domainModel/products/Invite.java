@@ -5,22 +5,23 @@ import it.cs.unicam.ids.filiera.domainModel.observer.Observer;
 import it.cs.unicam.ids.filiera.domainModel.observer.Subject;
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Entity
 public class Invite implements Subject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final Event event;
-    private final AuthUser addressee;
+    @ManyToOne
+    private Event event;
+    @ManyToOne
+    private AuthUser addressee;
     private boolean status;
-    private final List<Observer> observers;
+    @Transient
+    private List<Observer> observers;
 
     public Invite(Event event, AuthUser addressee) {
         this.event = event;
@@ -29,6 +30,10 @@ public class Invite implements Subject {
         this.observers = new ArrayList<>();
         this.attach(new UserObserver());
         this.notifyObservers();
+    }
+
+    public Invite() {
+
     }
 
     /**

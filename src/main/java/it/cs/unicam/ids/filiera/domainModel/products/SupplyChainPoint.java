@@ -1,7 +1,9 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.util.Coordinate;
+import jakarta.persistence.Embeddable;
 
+@Embeddable
 public class SupplyChainPoint {
 
 	private Long id;
@@ -14,6 +16,10 @@ public class SupplyChainPoint {
 		this.name = name;
 		this.descr = descr;
 		this.coords = coords;
+	}
+
+	public SupplyChainPoint() {
+
 	}
 
 	public Long getId() {

@@ -5,15 +5,16 @@ import it.cs.unicam.ids.filiera.domainModel.observer.Observer;
 import it.cs.unicam.ids.filiera.domainModel.observer.Subject;
 import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+/**
+ * Abstract base class for catalog items.
+ */
+@MappedSuperclass
 public abstract class CatalogItem implements Subject {
 
 	@Id
@@ -21,11 +22,18 @@ public abstract class CatalogItem implements Subject {
 	protected Long id;
 	protected String name;
 	protected Double price;
+	@ManyToOne
 	protected AuthUser owner;
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	protected Date expiryDate;
 	protected Status status;
+	@Transient
 	private final List<Observer> observers;
+
+	protected CatalogItem() {
+		this.observers = new ArrayList<>();
+		this.attach(new UserObserver());
+	}
 
 	public CatalogItem(String name, Double price, AuthUser owner, Date expiryDate, Status status){
 		this.name = name;
@@ -82,7 +90,8 @@ public abstract class CatalogItem implements Subject {
 	}
 
 	/**
-	 * When the status is set (by a curator), notify the observers.
+	 * Sets the status and notifies observers.
+	 * @param status the new status
 	 */
 	public void setStatus(Status status) {
 		this.status = status;

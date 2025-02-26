@@ -1,26 +1,32 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 import it.cs.unicam.ids.filiera.domainModel.Users.*;
+import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
-
+@Embeddable
 public abstract class Phase {
 
     private Date start;
     private Date end;
     private SupplyChainPoint location;
-
-    private User involvedUser;
+    @OneToOne
+    private AuthUser involvedUser;
+    @ElementCollection
     private List<Content> approvedContent;
+    @ElementCollection
+
     private List<Content> pendingContent;
     private String note;
-
-
 
     public Phase(Date start, Date end, SupplyChainPoint location) {
         this.start = start;
         this.end = end;
         this.location = location;
+    }
+
+    public Phase() {
+
     }
 
     public Date getStart() {

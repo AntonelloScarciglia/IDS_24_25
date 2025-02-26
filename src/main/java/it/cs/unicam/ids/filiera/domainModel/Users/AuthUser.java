@@ -1,9 +1,16 @@
 package it.cs.unicam.ids.filiera.domainModel.Users;
 
 import it.cs.unicam.ids.filiera.util.Role;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-public class AuthUser implements User{
+@Entity
+public class AuthUser implements User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
     private String email;
@@ -17,8 +24,7 @@ public class AuthUser implements User{
 
     }
 
-    public Long getId(){
-        return id;
+    public AuthUser() {
     }
 
     public String getUsername(){
@@ -35,5 +41,13 @@ public class AuthUser implements User{
 
     public void showMarketplace(){
         //TODO
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

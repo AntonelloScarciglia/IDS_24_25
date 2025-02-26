@@ -5,9 +5,10 @@ import it.cs.unicam.ids.filiera.domainModel.products.Bundle;
 import it.cs.unicam.ids.filiera.domainModel.products.Product;
 import it.cs.unicam.ids.filiera.util.Status;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public interface BundleRepository extends CrudRepository<Bundle, Long> {
     List<Bundle> findAllBundlesByOwner(AuthUser creator);
     List<Bundle> findAllBundlesByStatus(Status status);

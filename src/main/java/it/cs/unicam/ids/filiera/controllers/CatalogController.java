@@ -9,10 +9,6 @@ public class CatalogController {
 		throw new UnsupportedOperationException();
 	}
 
-	public void operation() {
-		// TODO - implement CatalogController.operation
-		throw new UnsupportedOperationException();
-	}
 
 	public void getSession() {
 		// TODO - implement CatalogController.getSession

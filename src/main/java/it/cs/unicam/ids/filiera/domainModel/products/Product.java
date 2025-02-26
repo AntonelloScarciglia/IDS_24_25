@@ -1,20 +1,22 @@
 package it.cs.unicam.ids.filiera.domainModel.products;
 
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
-import it.cs.unicam.ids.filiera.domainModel.Users.User;
 import it.cs.unicam.ids.filiera.domainModel.observer.UserObserver;
 import it.cs.unicam.ids.filiera.util.Status;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+@Entity
 public class Product extends CatalogItem {
 
 	private int quantity;
 	private String category;
+	@ElementCollection
 	private List<Phase> supplyChain;
-	// private List<Observers> observers;
 
 	public Product(String name, Double price, AuthUser owner, Date expiryDate, Status status, int quantity, String category) {
 		super(name, price, owner, expiryDate, status);
@@ -22,6 +24,11 @@ public class Product extends CatalogItem {
 		this.category = category;
 		this.supplyChain = new ArrayList<>();
 		this.attach(new UserObserver());
+	}
+
+	public Product() {
+		super();
+		this.supplyChain = new ArrayList<>();
 	}
 
 

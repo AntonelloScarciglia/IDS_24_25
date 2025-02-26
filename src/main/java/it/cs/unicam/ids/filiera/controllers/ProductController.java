@@ -3,188 +3,241 @@ package it.cs.unicam.ids.filiera.controllers;
 import it.cs.unicam.ids.filiera.domainModel.Users.AuthUser;
 import it.cs.unicam.ids.filiera.serviceLayer.ProductService;
 import it.cs.unicam.ids.filiera.domainModel.products.*;
+import it.cs.unicam.ids.filiera.serviceLayer.UserService;
 import it.cs.unicam.ids.filiera.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/product")
 public class ProductController {
 
-	@Autowired
-	private ProductService productService;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private UserService userService;
+
+    /**
+     * Retrieves a product by its ID.
+     *
+     * @param id The product ID.
+     * @return A ResponseEntity containing the product with HTTP status 200 (OK).
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+        Product product = productService.getProduct(id);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(product);
+    }
+
+    /**
+     * Retrieves all products.
+     *
+     * @return A ResponseEntity containing the list of all products with HTTP status 200 (OK).
+     */
+    @GetMapping("/all")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Retrieves all pending products.
+     *
+     * @return A ResponseEntity containing the list of all pending products with HTTP status 200 (OK).
+     */
+    @GetMapping("/pending")
+    public ResponseEntity<List<Product>> getAllPendingProducts() {
+        List<Product> products = productService.filterByStatus(Status.PENDING);
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Retrieves all approved products.
+     *
+     * @return A ResponseEntity containing the list of all approved products with HTTP status 200 (OK).
+     */
+    @GetMapping("/approved")
+    public ResponseEntity<List<Product>> getAllApprovedProducts() {
+        List<Product> products = productService.filterByStatus(Status.APPROVED);
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Approves a pending product.
+     *
+     * @param productId The ID of the product to approve.
+     * @param userId    The ID of the curator (user) approving the product.
+     * @return A ResponseEntity with a success message.
+     */
+    @PostMapping("/approve") // Maps POST requests on /product/approve
+    public ResponseEntity<String> approveProduct(@RequestParam Long productId, Long userId) {
+        Product product = productService.getProduct(productId);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // UserID should be retrievet automatically from SpringSecurity or HTTP Session
+        AuthUser curator = userService.getUserById(userId);
+        productService.approve(product, curator);
+        return ResponseEntity.ok("Product approved successfully.");
+    }
+
+    /**
+     * Rejects a pending product.
+     *
+     * @param productId The ID of the product to reject.
+     * @param reason    The reason for rejection.
+     * @param userId    The ID of the curator (user) rejecting the product.
+     * @return A ResponseEntity with a success message.
+     */
+    @PostMapping("/reject") // Maps POST requests on /product/reject
+    public ResponseEntity<String> rejectProduct(@RequestParam Long productId, @RequestParam String reason, @RequestParam Long userId) {
+        Product product = productService.getProduct(productId);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+		// UserID should be retrievet automatically from SpringSecurity or HTTP Session
+		AuthUser curator = userService.getUserById(userId);
+
+        productService.reject(product, reason, curator);
+        return ResponseEntity.ok("Product rejected successfully.");
+    }
 
 	/**
-	 * Method to retrieve a product from the repository
-	 * @param id Long
-	 * @return Product product
+	 * Retrieves the info of a product.
+	 *
+	 * @param productId The ID of the product.
+	 * @return A ResponseEntity containing the product info as a string.
 	 */
-	@GetMapping("/{id]")
-	public Product getProduct(Long id) {
-		return productService.getProduct(id);
-	}
-
-	/**
-	 * Method to retrieve all the product from the repository
-	 * @return List of all products
-	 */
-	@GetMapping("/all")
-	public List<Product> getAllProducts() {
-		return productService.getAllProducts();
-	}
-
-	/**
-	 * Method to retrieve all the pending products from the repository
-	 * @return List of all pending products
-	 */
-	@GetMapping("/pending")
-	public List<Product> getAllPendingProducts() {
-		return productService.filterByStatus(Status.PENDING);
-	}
-
-	/**
-	 * Method to retrieve all the approved products from the repository
-	 * @return List of all approved products
-	 */
-	@GetMapping("/approved")
-	public List<Product> getAllApprovedProducts() {
-		return productService.filterByStatus(Status.APPROVED);
-	}
-
-	/**
-	 * Method to approve a pending product
-	 * @param productId Long
-	 * @param user AuthUser
-	 */
-	public void approveProduct(Long productId, AuthUser user) {
-		productService.approve(productService.getProduct(productId), user);
-	}
-
-	/**
-	 * Method to reject a pending product
-	 * @param productId Long
-	 * @param reason String
-	 * @param user AuthUser
-	 */
-	public void rejectProduct(Long productId, String reason, AuthUser user) {
-		productService.reject(productService.getProduct(productId),reason, user);
-	}
-
-	/**
-	 * Method to retrieve the info of a product
-	 * @param productId Long
-	 * @return String of product's info
-	 */
-	public String getProductInfo(Long productId) {
-		return productService.getProduct(productId).getInfo();
-	}
-
-	/**
-	 *Method to create a product
-	 * @param name String
-	 * @param owner AuthUser
-	 * @param quantity int
-	 * @param price Double
-	 * @param expiryDate Date
-	 * @param category String
-	 * @return Product product
-	 */
-	public Product createProduct(String name, AuthUser owner, int quantity, Double price, Date expiryDate, String category) {
-		return productService.createProduct(name, owner, quantity, price, expiryDate, category);
-	}
-
-	/**
-	 * Method to add a new phase to a product
-	 * @param productId Long
-	 * @param p Phase
-	 */
-	public void addPhaseToProduct(Long productId, Phase p) {
-		this.getProduct(productId).addPhase(p);
-	}
-
-	/**
-	 * Method to add a content to a product
-	 * @param productId
-	 * @param c
-	 */
-	public void addContentToProduct(Long productId, Content c) {
-		// TODO - implement ProductController.addContentToProduct
-		throw new UnsupportedOperationException();
-	}
-
-	public void approveContent() {
-		// TODO - implement ProductController.approveContent
-		throw new UnsupportedOperationException();
-	}
-
-	public void rejectContent() {
-		// TODO - implement ProductController.rejectContent
-		throw new UnsupportedOperationException();
-	}
-
-	public void apportaModifiche() {
-		// TODO - implement ProductController.apportaModifiche
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
-	 * @param user AuthUser
-	 * @return List of products
-	 */
-	public List<Product> filterByOwner(AuthUser user) {
-		return productService.filterByCreator(user);
-	}
-
-	/**
-	 * 
-	 * @param c
-	 */
-	public void ToStringProductInfo(CatalogItem c) {
-		// TODO - implement ProductController.ToStringProductInfo
-		throw new UnsupportedOperationException();
-	}
-
-	public void updateProduct() {
-		// TODO - implement ProductController.updateProduct
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
-	 * @param data
-	 * @param Product
-	 */
-	public void addSupplyChainToProduct(int data, int Product) {
-		// TODO - implement ProductController.addSupplyChainToProduct
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
-	 * @param c
-	 * @param choice
-	 */
-	public void reviewItem(CatalogItem c, boolean choice) {
-		Product product = productService.getProduct(c.getId());
-		if(choice) {
-			productService.approve(product, product.getOwner());
-		} else {
-			productService.reject(product, "Product not valid for the approvement", product.getOwner());
+	@GetMapping("/info/{productId}") // Maps GET requests on /product/info/{productId}
+	public ResponseEntity<String> getProductInfo(@PathVariable Long productId) {
+		Product product = productService.getProduct(productId);
+		if (product == null) {
+			return ResponseEntity.notFound().build();
 		}
+		return ResponseEntity.ok(product.getInfo());
 	}
 
 	/**
-	 * Method to remove a product from the repository
-	 * @param product Product
+	 * Creates a new product.
+	 *
+	 * @param name       The name of the product.
+	 * @param ownerId    The ID of the owner/creator.
+	 * @param quantity   The quantity of the product.
+	 * @param price      The price of the product.
+	 * @param expiryDate The expiry date of the product.
+	 * @param category   The category of the product.
+	 * @return A ResponseEntity containing the created product.
 	 */
-	public void removeProduct(Product product) {
-		productService.deleteProduct(product);
+	@PostMapping("/create")
+	public ResponseEntity<Product> createProduct(@RequestParam String name,
+												  Long ownerId,
+												 @RequestParam int quantity,
+												 @RequestParam Double price,
+												 @RequestParam Date expiryDate,
+												 @RequestParam String category) {
+		// UserID should be obtained from SpringSecurity or HTTP session
+		AuthUser owner = userService.getUserById(ownerId);
+		Product product = productService.createProduct(name, owner, quantity, price, expiryDate, category);
+		return ResponseEntity.ok(product);
 	}
+
+
+    /**
+     * Method to add a new phase to a product
+     *
+     * @param productId Long
+     * @param p         Phase
+     */
+    public void addPhaseToProduct(Long productId, Phase p) {
+        // TODO - implement ProductController.addContentToProduct
+		throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Method to add a content to a product
+     *
+     * @param productId
+     * @param c
+     */
+    public void addContentToProduct(Long productId, Content c) {
+        // TODO - implement ProductController.addContentToProduct
+        throw new UnsupportedOperationException();
+    }
+
+    public void approveContent() {
+        // TODO - implement ProductController.approveContent
+        throw new UnsupportedOperationException();
+    }
+
+    public void rejectContent() {
+        // TODO - implement ProductController.rejectContent
+        throw new UnsupportedOperationException();
+    }
+
+    public void apportaModifiche() {
+        // TODO - implement ProductController.apportaModifiche
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param user AuthUser
+     * @return List of products
+     */
+    public List<Product> filterByOwner(AuthUser user) {
+        return productService.filterByCreator(user);
+    }
+
+    /**
+     * @param c
+     */
+    public void ToStringProductInfo(CatalogItem c) {
+        // TODO - implement ProductController.ToStringProductInfo
+        throw new UnsupportedOperationException();
+    }
+
+    public void updateProduct() {
+        // TODO - implement ProductController.updateProduct
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param data
+     * @param Product
+     */
+    public void addSupplyChainToProduct(int data, int Product) {
+        // TODO - implement ProductController.addSupplyChainToProduct
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param c
+     * @param choice
+     */
+    public void reviewItem(CatalogItem c, boolean choice) {
+        Product product = productService.getProduct(c.getId());
+        if (choice) {
+            productService.approve(product, product.getOwner());
+        } else {
+            productService.reject(product, "Product not valid for the approvement", product.getOwner());
+        }
+    }
+
+    /**
+     * Method to remove a product from the repository
+     *
+     * @param product Product
+     */
+    public void removeProduct(Product product) {
+        productService.deleteProduct(product);
+    }
 
 }
