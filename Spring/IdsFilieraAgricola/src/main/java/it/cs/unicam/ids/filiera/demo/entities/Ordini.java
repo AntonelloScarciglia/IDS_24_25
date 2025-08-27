@@ -3,8 +3,8 @@ package it.cs.unicam.ids.filiera.demo.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "utenti")
-public class Utente {
+@Table(name = "ordini")
+public class Ordini {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // primary key, autogenerata
