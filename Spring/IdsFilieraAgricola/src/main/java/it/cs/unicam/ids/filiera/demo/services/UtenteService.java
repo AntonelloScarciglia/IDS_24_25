@@ -1,7 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
 import it.cs.unicam.ids.filiera.demo.model.Prodotto;
-import it.cs.unicam.ids.filiera.demo.model.Venditore;
+import it.cs.unicam.ids.filiera.demo.factory.Venditore;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 
 import java.util.List;

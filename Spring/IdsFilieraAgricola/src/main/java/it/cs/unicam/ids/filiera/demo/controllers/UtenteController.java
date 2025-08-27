@@ -1,7 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
 import it.cs.unicam.ids.filiera.demo.model.Prodotto;
-import it.cs.unicam.ids.filiera.demo.model.Venditore;
+import it.cs.unicam.ids.filiera.demo.factory.Venditore;
 import it.cs.unicam.ids.filiera.demo.services.UtenteService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

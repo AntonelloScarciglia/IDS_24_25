@@ -4,4 +4,6 @@ public class Sessione {
 
 	private Carrello Carrello;
 
+    private Acquirente utente;
+
 }
