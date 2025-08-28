@@ -1,10 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.dtos;
 
-import it.cs.unicam.ids.filiera.demo.entities.Prodotto;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 
 public class ProdottoMapper {
     // Il mapper ProdottoMapper è responsabile della conversione tra entità Prodotto e DTO ProdottoDTO.

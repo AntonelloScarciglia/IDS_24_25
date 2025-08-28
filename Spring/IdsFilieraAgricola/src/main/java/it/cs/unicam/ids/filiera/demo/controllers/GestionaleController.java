@@ -1,7 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
-import it.cs.unicam.ids.filiera.demo.model.Carrello;
-import it.cs.unicam.ids.filiera.demo.model.Ordine;
+import it.cs.unicam.ids.filiera.demo.entity.Carrello;
+import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.model.Sessione;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -2,8 +2,8 @@ package it.cs.unicam.ids.filiera.demo.model;
 
 public class Sessione {
 
-	private Carrello Carrello;
+	private it.cs.unicam.ids.filiera.demo.entity.Carrello Carrello;
 
-    private Acquirente utente;
+    private UtenteVerificato utente;
 
 }

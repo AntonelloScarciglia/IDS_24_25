@@ -1,7 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
 import it.cs.unicam.ids.filiera.demo.dtos.ProdottoDTO;
-import it.cs.unicam.ids.filiera.demo.model.Prodotto;
+import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
