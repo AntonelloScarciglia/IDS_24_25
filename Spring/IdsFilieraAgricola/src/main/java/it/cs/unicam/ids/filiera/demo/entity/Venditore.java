@@ -1,13 +1,16 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
-import it.cs.unicam.ids.filiera.demo.model.Ruolo;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 
 @Entity
 public abstract class Venditore extends UtenteVerificato {
 
 	private String codiceFiscale;
 	private boolean attesa = true;
+    @Id
+    private Long id;
 
 	// Costruttore JPA
 	protected Venditore() {}
@@ -18,9 +21,9 @@ public abstract class Venditore extends UtenteVerificato {
 	}
 
 	// Ogni sottoclasse decide come crea i prodotti
-	public abstract Prodotto creaProdotto(String nomeProdotto, String categoria, double prezzo);
+	public abstract Prodotto creaProdotto(String nomeProdotto, String categoria, BigDecimal prezzo);
 
-	// --- Getter & Setter ---
+
 	public String getCodiceFiscale() {
 		return codiceFiscale;
 	}
@@ -35,5 +38,13 @@ public abstract class Venditore extends UtenteVerificato {
 
 	public void setAttesa(boolean attesa) {
 		this.attesa = attesa;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getId() {
+		return id;
 	}
 }

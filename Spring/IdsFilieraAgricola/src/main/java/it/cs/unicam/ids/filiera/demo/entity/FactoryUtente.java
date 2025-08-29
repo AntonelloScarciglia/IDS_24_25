@@ -1,7 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
 import it.cs.unicam.ids.filiera.demo.entity.*;
-import it.cs.unicam.ids.filiera.demo.model.Ruolo;
+import it.cs.unicam.ids.filiera.demo.entity.Ruolo;
 
 public final class FactoryUtente {
 

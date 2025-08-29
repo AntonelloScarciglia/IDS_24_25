@@ -1,7 +1,10 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
+import it.cs.unicam.ids.filiera.demo.entity.*;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+
+import java.math.BigDecimal;
 
 @Entity
 @DiscriminatorValue("PRODUTTORE")
@@ -12,7 +15,7 @@ public class Produttore extends Venditore {
 	}
 
 	@Override
-	public Prodotto creaProdotto(String nomeProdotto, String categoria, double prezzo) {
+	public Prodotto creaProdotto(String nomeProdotto, String categoria, BigDecimal prezzo) {
 		return null;
 	}
 

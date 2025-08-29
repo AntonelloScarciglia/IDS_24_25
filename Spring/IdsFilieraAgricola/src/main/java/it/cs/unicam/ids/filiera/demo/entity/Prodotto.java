@@ -9,23 +9,29 @@ import java.util.Objects;
 @Table(name = "prodotti")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("BASE")
 public class Prodotto {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private Long venditoreId;     // semplice FK logica, niente @ManyToOne
+	@Column(name = "venditore_id")
+	private Long venditoreId;
+
 	private String nome;
 	private String categoria;
-	private BigDecimal  prezzo;
 
-	@Temporal(TemporalType.DATE)
-	private LocalDate  dataScadenza;
+	@Column(precision = 12, scale = 2)
+	private BigDecimal prezzo;
+
+	@Column(name = "data_scadenza")
+	private LocalDate dataScadenza;
 
 	public Prodotto() {}
 
-	protected Prodotto(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate  dataScadenza) {
+	protected Prodotto(Long venditoreId, String nome, String categoria,
+					   BigDecimal prezzo, LocalDate dataScadenza) {
 		this.venditoreId = venditoreId;
 		this.nome = nome;
 		this.categoria = categoria;
@@ -48,12 +54,14 @@ public class Prodotto {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Prodotto)) return false;
-		Prodotto that = (Prodotto) o;
-		return id != null && id.equals(that.id);
+		if (!(o instanceof Prodotto other)) return false;
+
+		return id != null && id.equals(other.id);
 	}
 
 	@Override
-	public int hashCode() { return Objects.hash(getClass()); }
+	public int hashCode() {
+		// usare la classe evita problemi con proxy; non includere campi mutevoli
+		return Objects.hash(getClass(), id);
+	}
 }
-

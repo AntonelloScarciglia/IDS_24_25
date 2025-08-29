@@ -2,7 +2,7 @@ package it.cs.unicam.ids.filiera.demo.services;
 
 import it.cs.unicam.ids.filiera.demo.entity.Carrello;
 import it.cs.unicam.ids.filiera.demo.entity.Ordine;
-import it.cs.unicam.ids.filiera.demo.model.Sessione;
+import it.cs.unicam.ids.filiera.demo.entity.Sessione;
 
 public class GestionaleService {
 

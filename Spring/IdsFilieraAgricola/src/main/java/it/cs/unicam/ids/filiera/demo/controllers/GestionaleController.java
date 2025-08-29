@@ -1,8 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
-import it.cs.unicam.ids.filiera.demo.entity.Carrello;
-import it.cs.unicam.ids.filiera.demo.entity.Ordine;
-import it.cs.unicam.ids.filiera.demo.model.Sessione;
+import it.cs.unicam.ids.filiera.demo.entity.*;
+import it.cs.unicam.ids.filiera.demo.services.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,10 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/marketplace")
 public class GestionaleController {
 
-	public Sessione creaSessione() {
-		// TODO - implement GestionaleController.creaSessione
-		throw new UnsupportedOperationException();
-	}
+
 
 	/**
 	 * 

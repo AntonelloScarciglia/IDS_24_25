@@ -1,5 +1,4 @@
 package it.cs.unicam.ids.filiera.demo.entity;
-import it.cs.unicam.ids.filiera.demo.model.Ruolo;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,7 +8,7 @@ public abstract class UtenteVerificato {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String nome;
     private String cognome;
@@ -29,8 +28,17 @@ public abstract class UtenteVerificato {
         this.password = password;
     }
 
+    public UtenteVerificato(String nome, String cognome, String email, String password, String codiceFiscale) {
+        this.nome = nome;
+        this.cognome = cognome;
+        this.email = email;
+        this.password = password;
+    }
+
+
+
     // getter/setter
-    public int getId() { return id; }
+    public Long getId() { return id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getCognome() { return cognome; }

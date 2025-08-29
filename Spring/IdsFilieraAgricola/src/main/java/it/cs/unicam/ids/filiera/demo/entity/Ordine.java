@@ -1,55 +1,41 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ordini")
 public class Ordine {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// acquirente = utente che ha fatto l'ordine
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "acquirente_id")
 	private UtenteVerificato acquirente;
 
-	// relazione con Carrello (se lo vuoi salvare come entità)
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "carrello_id", referencedColumnName = "id")
-	private Carrello carrello;
+	private BigDecimal totale;
+	private LocalDateTime creatoIl = LocalDateTime.now();
 
-	private LocalDate dataOrdine;
+	protected Ordine() {}
 
-	// costruttori
-	public Ordine() {}
-
-	public Ordine(UtenteVerificato acquirente, Carrello carrello) {
+	public Ordine(UtenteVerificato acquirente, BigDecimal totale) {
 		this.acquirente = acquirente;
-		this.carrello = carrello;
-		this.dataOrdine = LocalDate.now();
+		this.totale = totale;
 	}
 
-	// getters e setters
 	public Long getId() { return id; }
-
 	public UtenteVerificato getAcquirente() { return acquirente; }
-	public void setAcquirente(UtenteVerificato acquirente) { this.acquirente = acquirente; }
+	public BigDecimal getTotale() { return totale; }
+	public LocalDateTime getCreatoIl() { return creatoIl; }
 
-	public Carrello getCarrello() { return carrello; }
-	public void setCarrello(Carrello carrello) { this.carrello = carrello; }
-
-	public LocalDate getDataOrdine() { return dataOrdine; }
-	public void setDataOrdine(LocalDate dataOrdine) { this.dataOrdine = dataOrdine; }
-
-	// toString
 	@Override
 	public String toString() {
-		return "Ordine #" + id +
-				" - Acquirente: " + acquirente.getEmail() +
-				" - Data: " + dataOrdine +
-				" - Prodotti: " + (carrello != null ? carrello.getProdotti().size() : 0);
+		return "Ordine{id=%d, utente=%s %s, totale=%s, creatoIl=%s}"
+				.formatted(id,
+						acquirente != null ? acquirente.getNome() : "?",
+						acquirente != null ? acquirente.getCognome() : "?",
+						totale, creatoIl);
 	}
 }
+
