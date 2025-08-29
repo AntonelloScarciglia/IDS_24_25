@@ -18,6 +18,7 @@ public class Bundle extends Prodotto {
 			inverseJoinColumns = @JoinColumn(name = "prodotto_id")
 	)
 	private List<Prodotto> prodotti = new ArrayList<>();
+	private boolean isBundle;
 
 	// costruttore  JPA
 	protected Bundle() {
@@ -35,4 +36,8 @@ public class Bundle extends Prodotto {
 	public void setProdotti(List<Prodotto> prodotti) {
 		this.prodotti = prodotti;
 	}
+
+	public boolean getisBundle() { return isBundle;	}
+
+	public void setBundle(boolean bundle) { this.isBundle = bundle; }
 }
