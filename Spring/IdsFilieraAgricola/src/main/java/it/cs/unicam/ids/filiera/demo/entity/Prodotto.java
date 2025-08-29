@@ -30,8 +30,8 @@ public class Prodotto {
 
 	public Prodotto() {}
 
-	protected Prodotto(Long venditoreId, String nome, String categoria,
-					   BigDecimal prezzo, LocalDate dataScadenza) {
+	public Prodotto(Long venditoreId, String nome, String categoria,
+                    BigDecimal prezzo, LocalDate dataScadenza) {
 		this.venditoreId = venditoreId;
 		this.nome = nome;
 		this.categoria = categoria;

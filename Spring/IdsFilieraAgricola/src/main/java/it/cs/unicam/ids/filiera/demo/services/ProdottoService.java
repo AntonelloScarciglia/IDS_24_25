@@ -1,11 +1,12 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
-import it.cs.unicam.ids.filiera.demo.dtos.ProdottoDTO;
+import it.cs.unicam.ids.filiera.demo.dtos.*;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,7 +17,7 @@ public class ProdottoService {
     private ProdottoRepository prodottoRepository;
 
     /**
-     *
+     *crea un nuovo prodotto base
      * @param dtoProd
      */
     public String newProdotto(ProdottoDTO dtoProd) {
@@ -25,7 +26,7 @@ public class ProdottoService {
     }
 
     /**
-     *
+     * aggiunge il prodotto in repo
      * @param prodotto
      */
     public Prodotto salvaProdotto(Prodotto prodotto) {
@@ -34,7 +35,7 @@ public class ProdottoService {
     }
 
     /**
-     *
+     * elimina il prodotto dalla repo
      * @param id
      */
     public Prodotto rimuoviProdotto(int id) {
@@ -43,7 +44,7 @@ public class ProdottoService {
     }
 
     /**
-     *
+     * to string prodotto
      * @param id
      */
     public Prodotto visualizzaProdotto(int id) {
@@ -51,13 +52,17 @@ public class ProdottoService {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * ritorna tutti i prodotti in stato approvato
+     * @return
+     */
     public List<Prodotto> visualizzaTuttiProdotti() {
         // TODO - implement ProdottoService.visualizzaTuttiProdotti
         throw new UnsupportedOperationException();
     }
 
     /**
-     *
+     * aggiungi certificato ni prod trasformati
      * @param c
      */
     public String aggiungiCertificato(String c) {
@@ -66,27 +71,18 @@ public class ProdottoService {
     }
 
     /**
-     *
-     * @param id
+     *cambia nome e prezzo prodotto
      * @param nome
-     * @param quantita
+     * @param prezzo
      */
-    public String modificaProdotto(int id, String nome, int quantita) {
+    public String aggiorna(String nome, BigDecimal prezzo) {
         // TODO - implement ProdottoService.modificaProdotto
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @param dtoBundle
-     */
-    public String creaBundle(ProdottoDTO dtoBundle) {
-        // TODO - implement ProdottoService.creaBundle
-        throw new UnsupportedOperationException();
-    }
 
     /**
-     *
+     * chiama repo per ottenere tutti i prodotti filtrati lutente con id
      * @param id
      */
     public List<Prodotto> visualizzaProdottiUtente(int id) {
@@ -96,7 +92,7 @@ public class ProdottoService {
 
 
     /**
-     *
+     * crea prodotto trasformato
      * @param dtoProdTrasf
      */
     public Prodotto newProdottoTrasformato(ProdottoDTO dtoProdTrasf) {
@@ -105,7 +101,7 @@ public class ProdottoService {
     }
 
     /**
-     *
+     * aggiunge un prodotto alla lista bundle
      * @param prodotto
      */
     public String aggiungiProdottoBundle(Prodotto prodotto) {
@@ -114,7 +110,7 @@ public class ProdottoService {
     }
 
     /**
-     *
+     *filtro er ottenre i prodotti on id inserito
      * @param id
      */
     public List<Prodotto> getProdotti(int id) {
@@ -122,13 +118,16 @@ public class ProdottoService {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * prende la lista del buundle il prezzo e il nome
+     */
     public Prodotto newBundle() {
         // TODO - implement ProdottoService.newBundle
         throw new UnsupportedOperationException();
     }
 
     /**
-     *
+     * impostata lo stato del prodotto in attesa true o false
      * @param attesa
      */
     public Prodotto setStato(boolean attesa) {
@@ -136,6 +135,10 @@ public class ProdottoService {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * ritorna i prodotti in attesa con stato non approvato
+     * @return
+     */
     public List<Prodotto> getProdottiInAttesa() {
         // TODO - implement ProdottoService.getProdottiInAttesa
         throw new UnsupportedOperationException();
@@ -150,13 +153,5 @@ public class ProdottoService {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @param prodotto
-     */
-    public Prodotto aggiorna(int prodotto) {
-        // TODO - implement ProdottoService.aggiorna
-        throw new UnsupportedOperationException();
-    }
 
 }
