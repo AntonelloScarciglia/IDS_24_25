@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/marketplace")
+@RequestMapping("/gestionale")
 public class GestionaleController {
 
 	private final GestionaleService gestionaleService;
@@ -61,4 +61,12 @@ public class GestionaleController {
 	public ResponseEntity<String> handleBadRequest(RuntimeException ex) {
 		return ResponseEntity.badRequest().body(ex.getMessage());
 	}
+
+
+
+	@GetMapping("/ping")
+	public String ping() {
+		return "OK - Gestionale attivo!";
+	}
+
 }
