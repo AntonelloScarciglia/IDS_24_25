@@ -2,7 +2,6 @@ package it.cs.unicam.ids.filiera.demo.model;
 
 
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
-import it.cs.unicam.ids.filiera.demo.entity.RigaCarrello;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -51,4 +50,10 @@ public class Carrello implements Serializable {
 		sb.append("Totale: ").append(getTotale()).append(" }");
 		return sb.toString();
 	}
+
+	public void rimuovi(Long prodottoId) {
+		righe.remove(prodottoId);
+	}
+
+
 }

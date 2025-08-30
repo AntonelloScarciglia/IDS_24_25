@@ -1,62 +1,48 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
-import it.cs.unicam.ids.filiera.demo.model.Carrello;
-import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
-import it.cs.unicam.ids.filiera.demo.model.Sessione;
 
+import it.cs.unicam.ids.filiera.demo.model.Carrello;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
 public class AcquistoService {
 
-	private Sessione sessione;
+	@Autowired
+	private GestionaleService gestionaleService;
 
-	/**
-	 * 
-	 * @param c
-	 */
-	public String creaCarrello(Carrello c) {
-		// TODO - implement AcquistoService.creaCarrello
-		throw new UnsupportedOperationException();
+	public String aggiungiAlCarrello(HttpSession session, Long prodottoId, int qty) {
+		gestionaleService.aggiungiAlCarrello(session, prodottoId, qty);
+		return "Prodotto aggiunto al carrello";
 	}
 
-	/**
-	 * 
-	 * @param p
-	 */
-	public String aggiungiAlCarrello(Prodotto p) {
-		// TODO - implement AcquistoService.aggiungiAlCarrello
-		throw new UnsupportedOperationException();
+	public String rimuoviDalCarrello(HttpSession session, Long prodottoId) {
+		gestionaleService.getCarrello(session).rimuovi(prodottoId);
+		return "Prodotto rimosso dal carrello";
 	}
 
-	/**
-	 * 
-	 * @param id
-	 */
-	public String rimuoviDalCarrello(int id) {
-		// TODO - implement AcquistoService.rimuoviDalCarrello
-		throw new UnsupportedOperationException();
+	public String svuotaCarrello(HttpSession session) {
+		gestionaleService.aggiornaCarrello(session);
+		return "Carrello svuotato";
 	}
 
-	public Carrello getCarrello() {
-		// TODO - implement AcquistoService.getCarrello
-		throw new UnsupportedOperationException();
+	public String mostraContenutoCarrello(HttpSession session) {
+		return gestionaleService.mostraContenutoCarrello(session);
 	}
 
-	public String svuotaCarrello() {
-		// TODO - implement AcquistoService.svuotaCarrello
-		throw new UnsupportedOperationException();
+	public float visualizzaTotale(HttpSession session) {
+		return gestionaleService.getCarrello(session).getTotale().floatValue();
 	}
 
-	public float visualizzaTotale() {
-		// TODO - implement AcquistoService.visualizzaTotale
-		throw new UnsupportedOperationException();
+	public String acquista(HttpSession session) {
+		gestionaleService.aggiungiOrdine(session);
+		return "Ordine effettuato con successo";
 	}
 
-	/**
-	 * 
-	 * @param s
-	 */
-	public String acquista(int s) {
-		// TODO - implement AcquistoService.acquista
-		throw new UnsupportedOperationException();
+	public Carrello getCarrello(HttpSession session) {
+		return gestionaleService.getCarrello(session);
 	}
+
 
 }

@@ -98,4 +98,9 @@ public class GestionaleService {
 	public void newOrdine(HttpSession httpSession) {
 		aggiungiOrdine(httpSession);
 	}
+
+	public Carrello getCarrello(HttpSession session) {
+		return getOrCreate(session).getCarrello();
+	}
+
 }

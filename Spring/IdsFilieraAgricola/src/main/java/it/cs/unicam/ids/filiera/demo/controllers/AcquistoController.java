@@ -1,60 +1,67 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
-import it.cs.unicam.ids.filiera.demo.entity.*;
-import it.cs.unicam.ids.filiera.demo.services.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
+import it.cs.unicam.ids.filiera.demo.model.Carrello;
+import it.cs.unicam.ids.filiera.demo.model.RigaCarrello;
+import it.cs.unicam.ids.filiera.demo.services.AcquistoService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-
-import java.util.List;
-
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/acquisto")
 public class AcquistoController {
 
+	@Autowired
 	private AcquistoService serviceAcquisto;
 
-	/**
-	 * 
-	 * @param p
-	 */
-	public String richiestaAggiungiAlCarrello(Prodotto p) {
-		// TODO - implement AcquistoController.richiestaAggiungiAlCarrello
-		throw new UnsupportedOperationException();
+	// Aggiungi al carrello
+	@PostMapping("/carrello/{id}")
+	public ResponseEntity<String> richiestaAggiungiAlCarrello(
+			@PathVariable Long id,
+			@RequestParam(defaultValue = "1") int qty,
+			HttpSession session) {
+		String risposta = serviceAcquisto.aggiungiAlCarrello(session, id, qty);
+		return ResponseEntity.ok(risposta);
 	}
 
-	/**
-	 * 
-	 * @param id
-	 */
-	public String richiestaRimuoviDalCarrello(int id) {
-		// TODO - implement AcquistoController.richiestaRimuoviDalCarrello
-		throw new UnsupportedOperationException();
+	// Rimuovi dal carrello
+	@DeleteMapping("/carrello/{id}")
+	public ResponseEntity<String> richiestaRimuoviDalCarrello(
+			@PathVariable Long id,
+			HttpSession session) {
+		String risposta = serviceAcquisto.rimuoviDalCarrello(session, id);
+		return ResponseEntity.ok(risposta);
 	}
 
-	public List<Prodotto> richiestaVisualizzaCarrello() {
-		// TODO - implement AcquistoController.richiestaVisualizzaCarrello
-		throw new UnsupportedOperationException();
+	// Visualizza carrello (righe)
+	@GetMapping("/carrello")
+	public ResponseEntity<Collection<RigaCarrello>> richiestaVisualizzaCarrello(HttpSession session) {
+		Carrello carrello = serviceAcquisto.getCarrello(session);
+		return ResponseEntity.ok(carrello.getRighe());
 	}
 
-	public String richiestaSvuotaCarrello() {
-		// TODO - implement AcquistoController.richiestaSvuotaCarrello
-		throw new UnsupportedOperationException();
+	// Svuota carrello
+	@DeleteMapping("/carrello")
+	public ResponseEntity<String> richiestaSvuotaCarrello(HttpSession session) {
+		String risposta = serviceAcquisto.svuotaCarrello(session);
+		return ResponseEntity.ok(risposta);
 	}
 
-	public float richiestaVisualizzaTotale() {
-		// TODO - implement AcquistoController.richiestaVisualizzaTotale
-		throw new UnsupportedOperationException();
+	// Visualizza totale
+	@GetMapping("/totale")
+	public ResponseEntity<Float> richiestaVisualizzaTotale(HttpSession session) {
+		float totale = serviceAcquisto.visualizzaTotale(session);
+		return ResponseEntity.ok(totale);
 	}
 
-	/**
-	 * 
-	 * @param s
-	 */
-	public String richiestaAcquista(int s) {
-		// TODO - implement AcquistoController.richiestaAcquista
-		throw new UnsupportedOperationException();
+	// Acquista (conferma ordine)
+	@PostMapping("/acquista")
+	public ResponseEntity<String> richiestaAcquista(HttpSession session) {
+		String risposta = serviceAcquisto.acquista(session);
+		return ResponseEntity.ok(risposta);
 	}
-
 }
