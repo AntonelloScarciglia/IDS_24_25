@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 
 public record ProdottoTrasformatoDTO(
+        Long venditoreId,
         String nome,
         String categoria,
         BigDecimal prezzo,

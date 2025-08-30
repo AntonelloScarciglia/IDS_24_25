@@ -37,7 +37,7 @@ public class Bundle extends Prodotto {
 		this.prodotti = prodotti;
 	}
 
-	public boolean getisBundle() { return isBundle;	}
+	public boolean isBundle() { return isBundle; }
 
 	public void setBundle(boolean bundle) { this.isBundle = bundle; }
 }

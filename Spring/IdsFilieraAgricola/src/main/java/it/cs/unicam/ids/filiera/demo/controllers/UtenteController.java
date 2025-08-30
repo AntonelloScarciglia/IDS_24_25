@@ -1,55 +1,65 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
-import it.cs.unicam.ids.filiera.demo.entity.*;
-import it.cs.unicam.ids.filiera.demo.services.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
+import it.cs.unicam.ids.filiera.demo.dtos.UtenteDTO;
+import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
+import it.cs.unicam.ids.filiera.demo.services.UtenteService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-
 
 @RestController
 @RequestMapping("/utenti")
 public class UtenteController {
 
-	private UtenteService serviceUtente;
+	private final UtenteService utenteService;
 
-	/**
-	 * 
-	 * @param email
-	 * @param psw
-	 */
-	public String registrarsi(String email, String psw) {
-		// TODO - implement UtenteController.registrarsi
-		throw new UnsupportedOperationException();
+	@Autowired
+	public UtenteController(UtenteService utenteService) {
+		this.utenteService = utenteService;
 	}
 
 	/**
-	 * 
-	 * @param utente
+	 * Registrazione di un utente, acquirente o venditore.
 	 */
-	public String login(Venditore utente) {
-		// TODO - implement UtenteController.login
-		throw new UnsupportedOperationException();
+	@PostMapping("/registrazione")
+	public ResponseEntity<String> registrazione(@RequestBody RegistrazioneDTO dto) {
+		try {
+			String result = utenteService.registrazioneUtente(dto);
+			return ResponseEntity.ok(result);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	/**
-	 * 
-	 * @param id
+	 * Login generico per utente (email, password).
 	 */
-	public String richiestaVisualizzaUtente(int id) {
-		// TODO - implement UtenteController.richiestaVisualizzaUtente
-		throw new UnsupportedOperationException();
+	@PostMapping("/login")
+	public ResponseEntity<String> login(@RequestBody UtenteDTO dto) {
+		try {
+			String result = utenteService.login(dto.email(), dto.password());
+			return ResponseEntity.ok(result);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	/**
-	 * 
-	 * @param id
+	 * Visualizza info utente.
 	 */
-	public List<Prodotto> richiestaProdottiPosseduti(int id) {
-		// TODO - implement UtenteController.richiestaProdottiPosseduti
-		throw new UnsupportedOperationException();
+	@GetMapping("/{id}")
+	public ResponseEntity<?> visualizzaUtente(@PathVariable int id) {
+		return ResponseEntity.ok(utenteService.visualizzaUtente(id));
 	}
 
+	/**
+	 * Restituisce prodotti posseduti da un venditore.
+	 */
+	@GetMapping("/{id}/prodotti")
+	public ResponseEntity<List<Prodotto>> prodottiUtente(@PathVariable int id) {
+		return ResponseEntity.ok(utenteService.prodottiPosseduti(id));
+	}
 }

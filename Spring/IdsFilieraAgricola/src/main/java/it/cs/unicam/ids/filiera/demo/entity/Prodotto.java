@@ -28,40 +28,53 @@ public class Prodotto {
 	@Column(name = "data_scadenza")
 	private LocalDate dataScadenza;
 
+	@Column(name = "attesa") // 👉 aggiunto
+	private boolean attesa = true; // default: in attesa
+
+	// Costruttore JPA
 	public Prodotto() {}
 
 	public Prodotto(Long venditoreId, String nome, String categoria,
-                    BigDecimal prezzo, LocalDate dataScadenza) {
+					BigDecimal prezzo, LocalDate dataScadenza) {
 		this.venditoreId = venditoreId;
 		this.nome = nome;
 		this.categoria = categoria;
 		this.prezzo = prezzo;
 		this.dataScadenza = dataScadenza;
+		this.attesa = true; // default
 	}
 
+	// Getter / Setter
 	public Long getId() { return id; }
+
 	public Long getVenditoreId() { return venditoreId; }
 	public void setVenditoreId(Long venditoreId) { this.venditoreId = venditoreId; }
+
 	public String getNome() { return nome; }
 	public void setNome(String nome) { this.nome = nome; }
+
 	public String getCategoria() { return categoria; }
 	public void setCategoria(String categoria) { this.categoria = categoria; }
+
 	public BigDecimal getPrezzo() { return prezzo; }
 	public void setPrezzo(BigDecimal prezzo) { this.prezzo = prezzo; }
+
 	public LocalDate getDataScadenza() { return dataScadenza; }
 	public void setDataScadenza(LocalDate dataScadenza) { this.dataScadenza = dataScadenza; }
+
+	public boolean isAttesa() { return attesa; }
+	public void setAttesa(boolean attesa) { this.attesa = attesa; }
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Prodotto other)) return false;
-
 		return id != null && id.equals(other.id);
 	}
 
 	@Override
 	public int hashCode() {
-		// usare la classe evita problemi con proxy; non includere campi mutevoli
 		return Objects.hash(getClass(), id);
 	}
 }
+

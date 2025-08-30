@@ -4,4 +4,6 @@ import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UtenteRepository extends JpaRepository<UtenteVerificato, Long> {
+
+    UtenteVerificato findByEmail(String email); // 🔍 Per login
 }
