@@ -1,5 +1,6 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
+import it.cs.unicam.ids.filiera.demo.dtos.LoginDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.UtenteDTO;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
@@ -38,7 +39,7 @@ public class UtenteController {
 	 * Login generico per utente (email, password).
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody UtenteDTO dto) {
+	public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
 		try {
 			String result = utenteService.login(dto.email(), dto.password());
 			return ResponseEntity.ok(result);
