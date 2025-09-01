@@ -84,6 +84,21 @@ public class UtenteService {
 		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
 	}
 
+	public void loginAnimatoreFittizio(HttpSession session) {
+		UtenteVerificato animatoreFinto = FactoryUtente.createUser(Ruolo.ANIMATORE,
+				"Fabrizio",
+				"Romano",
+				"fabrizioromano@example.com",
+				"psw" ,
+				null);
+		utenteRepository.save(animatoreFinto);
+
+		session.setAttribute("utente", animatoreFinto);
+
+		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+		s.setUtente(animatoreFinto);
+		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+	}
 
 	public List<Ordine> ordiniUtente(HttpSession session) {
 		Sessione s = gestionaleService.newSessione(session); // oppure getOrCreate

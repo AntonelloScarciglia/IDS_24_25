@@ -14,6 +14,7 @@ public final class FactoryUtente {
             case TRASFORMATORE -> new Trasformatore(nome, cognome, email, password, codiceFiscale);
             case DISTRIBUTORE  -> new Distributore(nome, cognome, email, password, codiceFiscale);
             case ACQUIRENTE    -> new Acquirente(nome, cognome, email, password);
+            case ANIMATORE     -> new Animatore(nome, cognome, email, password);
         };
     }
 }
