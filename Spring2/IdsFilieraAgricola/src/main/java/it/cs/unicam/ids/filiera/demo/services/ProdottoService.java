@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -270,6 +271,39 @@ public class ProdottoService {
         prodottoRepository.delete(prodotto);
         return prodotto;
     }
+
+
+
+    public List<ProdottoDTO> visualizzaTuttiProdottiDTO() {
+        List<Prodotto> prodottiNormali = prodottoRepository.findAll().stream()
+                .filter(p -> !(p instanceof Bundle))
+                .toList();
+
+        List<Bundle> bundles = prodottoRepository.findTuttiIBundleConProdotti();
+
+        List<ProdottoDTO> result = new ArrayList<>();
+        prodottiNormali.forEach(p -> result.add(ProdottoMapper.inDTO(p)));
+        bundles.forEach(b -> result.add(ProdottoMapper.inDTO(b)));
+
+        return result;
+    }
+
+
+
+    public List<ProdottoDTO> visualizzaProdottiApprovatiDTO() {
+        List<Prodotto> prodottiNormali = prodottoRepository.findByAttesaFalse().stream()
+                .filter(p -> !(p instanceof Bundle))
+                .toList();
+
+        List<Bundle> bundles = prodottoRepository.findBundleConfermatiConProdotti();
+
+        List<ProdottoDTO> result = new ArrayList<>();
+        prodottiNormali.forEach(p -> result.add(ProdottoMapper.inDTO(p)));
+        bundles.forEach(b -> result.add(ProdottoMapper.inDTO(b)));
+
+        return result;
+    }
+
 
 
 

@@ -10,13 +10,27 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
+
     List<Prodotto> findByVenditoreId(Long venditoreId);
 
-    @Query("select b from Bundle b left join fetch b.prodotti where b.id = :id")
-    Optional<Bundle> findBundleWithProdotti(@Param("id") Long id);
     List<Prodotto> findByAttesaTrue();
+
     List<Prodotto> findByAttesaFalse();
+
     List<Prodotto> findByCategoria(String categoria);
+
+    // ✅ Per ottenere un singolo bundle con i prodotti
+    @Query("SELECT b FROM Bundle b LEFT JOIN FETCH b.prodotti WHERE b.id = :id")
+    Optional<Bundle> findBundleWithProdotti(@Param("id") Long id);
+
+    // ✅ Per ottenere tutti i bundle approvati con i prodotti
+    @Query("SELECT DISTINCT b FROM Bundle b LEFT JOIN FETCH b.prodotti WHERE b.attesa = false")
+    List<Bundle> findBundleConfermatiConProdotti();
+
+    // ✅ Per ottenere tutti i bundle (anche in attesa) con i prodotti
+    @Query("SELECT DISTINCT b FROM Bundle b LEFT JOIN FETCH b.prodotti")
+    List<Bundle> findTuttiIBundleConProdotti();
 }

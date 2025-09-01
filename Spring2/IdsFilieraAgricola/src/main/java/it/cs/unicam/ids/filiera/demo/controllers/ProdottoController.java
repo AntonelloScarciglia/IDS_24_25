@@ -5,12 +5,14 @@ import it.cs.unicam.ids.filiera.demo.dtos.ProdottoDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.ProdottoTrasformatoDTO;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.services.ProdottoService;
+import it.cs.unicam.ids.filiera.demo.dtos.ProdottoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/prodotti")
@@ -19,105 +21,128 @@ public class ProdottoController {
     @Autowired
     private ProdottoService prodottoService;
 
-    // POST /prodotti - crea un nuovo prodotto base
     @PostMapping
     public ResponseEntity<String> creaProdotto(@RequestBody ProdottoDTO dto) {
         String result = prodottoService.newProdotto(dto);
         return ResponseEntity.ok(result);
     }
 
-    // GET /prodotti - tutti i prodotti
     @GetMapping
-    public ResponseEntity<List<Prodotto>> getTuttiProdotti() {
-        return ResponseEntity.ok(prodottoService.visualizzaTuttiProdotti());
+    public ResponseEntity<List<ProdottoDTO>> getTuttiProdotti() {
+        return ResponseEntity.ok(
+                prodottoService.visualizzaTuttiProdottiDTO()
+        );
     }
 
-    // GET /prodotti/{id} - prodotto singolo
+
     @GetMapping("/{id}")
-    public ResponseEntity<Prodotto> getProdotto(@PathVariable int id) {
-        return ResponseEntity.ok(prodottoService.visualizzaProdotto(id));
+    public ResponseEntity<ProdottoDTO> getProdotto(@PathVariable int id) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.visualizzaProdotto(id))
+        );
     }
 
-    // DELETE /prodotti/{id} - elimina prodotto
     @DeleteMapping("/{id}")
-    public ResponseEntity<Prodotto> deleteProdotto(@PathVariable int id) {
-        return ResponseEntity.ok(prodottoService.rimuoviProdotto(id));
+    public ResponseEntity<ProdottoDTO> deleteProdotto(@PathVariable int id) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.rimuoviProdotto(id))
+        );
     }
 
-    // GET /prodotti/in-attesa - prodotti ancora non approvati
     @GetMapping("/in-attesa")
-    public ResponseEntity<List<Prodotto>> getProdottiInAttesa() {
-        return ResponseEntity.ok(prodottoService.getProdottiInAttesa());
+    public ResponseEntity<List<ProdottoDTO>> getProdottiInAttesa() {
+        return ResponseEntity.ok(
+                prodottoService.getProdottiInAttesa().stream()
+                        .map(ProdottoMapper::inDTO)
+                        .collect(Collectors.toList())
+        );
     }
 
-    // PUT /prodotti/{id}/approva - approva prodotto
     @PutMapping("/{id}/approva")
-    public ResponseEntity<Prodotto> approvaProdotto(@PathVariable int id) {
-        return ResponseEntity.ok(prodottoService.approvaProdotto(id));
+    public ResponseEntity<ProdottoDTO> approvaProdotto(@PathVariable int id) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.approvaProdotto(id))
+        );
     }
 
-    // DELETE /prodotti/{id}/rifiuta - rifiuta prodotto
     @DeleteMapping("/{id}/rifiuta")
-    public ResponseEntity<Prodotto> rifiutaProdotto(@PathVariable int id) {
-        return ResponseEntity.ok(prodottoService.rifiutaProdotto(id));
+    public ResponseEntity<ProdottoDTO> rifiutaProdotto(@PathVariable int id) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.rifiutaProdotto(id))
+        );
     }
 
-    // PUT /prodotti/{id}?nome=...&prezzo=... - aggiorna nome e prezzo
+
+    @GetMapping("/approvati")
+    public ResponseEntity<List<ProdottoDTO>> getProdottiApprovati() {
+        return ResponseEntity.ok(prodottoService.visualizzaProdottiApprovatiDTO());
+    }
+
+
+
+
+
+
     @PutMapping("/{id}")
-    public ResponseEntity<Prodotto> aggiornaNomePrezzo(
+    public ResponseEntity<ProdottoDTO> aggiornaNomePrezzo(
             @PathVariable int id,
             @RequestParam String nome,
             @RequestParam BigDecimal prezzo) {
-        Prodotto aggiornato = prodottoService.aggiornaProdotto(id, nome, prezzo);
-        return ResponseEntity.ok(aggiornato);
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.aggiornaProdotto(id, nome, prezzo))
+        );
     }
 
-    // GET /prodotti/venditore/{id} - prodotti per venditore
     @GetMapping("/venditore/{id}")
-    public ResponseEntity<List<Prodotto>> getProdottiPerVenditore(@PathVariable int id) {
-        return ResponseEntity.ok(prodottoService.getProdotti(id));
+    public ResponseEntity<List<ProdottoDTO>> getProdottiPerVenditore(@PathVariable int id) {
+        return ResponseEntity.ok(
+                prodottoService.getProdotti(id).stream()
+                        .map(ProdottoMapper::inDTO)
+                        .collect(Collectors.toList())
+        );
     }
 
-    // POST /prodotti/trasformato - crea prodotto trasformato
     @PostMapping("/trasformato")
-    public ResponseEntity<Prodotto> creaProdottoTrasformato(@RequestBody ProdottoTrasformatoDTO dto) {
+    public ResponseEntity<ProdottoDTO> creaProdottoTrasformato(@RequestBody ProdottoTrasformatoDTO dto) {
         try {
-            Prodotto nuovoProdotto = prodottoService.newProdottoTrasformato(dto);
-            return ResponseEntity.ok(nuovoProdotto);
+            return ResponseEntity.ok(
+                    ProdottoMapper.inDTO(prodottoService.newProdottoTrasformato(dto))
+            );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
 
-    // POST /prodotti/bundle - crea nuovo bundle
     @PostMapping("/bundle")
-    public ResponseEntity<Prodotto> creaBundle(@RequestBody BundleDTO dto) {
-        Prodotto bundle = prodottoService.newBundle(dto);
-        return ResponseEntity.ok(bundle);
+    public ResponseEntity<ProdottoDTO> creaBundle(@RequestBody BundleDTO dto) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.newBundle(dto))
+        );
     }
 
-    // PATCH /prodotti/bundle/{bundleId}/aggiungi/{prodottoId} - aggiunge prodotto al bundle
     @PatchMapping("/bundle/{bundleId}/aggiungi/{prodottoId}")
-    public ResponseEntity<Prodotto> aggiungiProdottoABundle(
+    public ResponseEntity<ProdottoDTO> aggiungiProdottoABundle(
             @PathVariable Long bundleId,
             @PathVariable Long prodottoId) {
-        Prodotto result = prodottoService.aggiungiProdottoBundle(bundleId, prodottoId);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.aggiungiProdottoBundle(bundleId, prodottoId))
+        );
     }
 
     @DeleteMapping("/bundle/{bundleId}/rimuovi/{prodottoId}")
-    public ResponseEntity<Prodotto> rimuoviProdottoDaBundle(
+    public ResponseEntity<ProdottoDTO> rimuoviProdottoDaBundle(
             @PathVariable Long bundleId,
             @PathVariable Long prodottoId) {
-        Prodotto result = prodottoService.rimuoviProdottoDaBundle(bundleId, prodottoId);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.rimuoviProdottoDaBundle(bundleId, prodottoId))
+        );
     }
 
     @PutMapping("/bundle/{id}/conferma")
-    public ResponseEntity<Prodotto> confermaBundle(@PathVariable Long id) {
-        Prodotto bundle = prodottoService.confermaBundle(id);
-        return ResponseEntity.ok(bundle);
+    public ResponseEntity<ProdottoDTO> confermaBundle(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                ProdottoMapper.inDTO(prodottoService.confermaBundle(id))
+        );
     }
-
 
 }

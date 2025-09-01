@@ -3,6 +3,7 @@ package it.cs.unicam.ids.filiera.demo.dtos;
 import it.cs.unicam.ids.filiera.demo.entity.Bundle;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.ProdottoTrasformato;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -25,11 +26,14 @@ public class ProdottoMapper {
             metodo = pt.getMetodoTrasformazione();
         } else if (p instanceof Bundle pb) {
             tipo = "BUNDLE";
-            componenti = pb.getProdotti() == null
-                    ? List.of()
-                    : pb.getProdotti().stream()
-                    .map(Prodotto::getId)
-                    .toList();
+
+            if (Hibernate.isInitialized(pb.getProdotti()) && pb.getProdotti() != null) {
+                componenti = pb.getProdotti().stream()
+                        .map(Prodotto::getId)
+                        .toList();
+            } else {
+                componenti = List.of();
+            }
         }
 
         return new ProdottoDTO(

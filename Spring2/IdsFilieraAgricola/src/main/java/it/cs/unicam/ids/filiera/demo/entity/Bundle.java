@@ -11,7 +11,7 @@ import java.util.List;
 @DiscriminatorValue("BUNDLE")
 public class Bundle extends Prodotto {
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 			name = "bundle_prodotti",
 			joinColumns = @JoinColumn(name = "bundle_id"),
