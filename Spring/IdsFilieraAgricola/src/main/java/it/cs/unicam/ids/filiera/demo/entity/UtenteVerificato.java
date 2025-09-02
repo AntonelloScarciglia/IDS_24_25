@@ -1,4 +1,5 @@
 package it.cs.unicam.ids.filiera.demo.entity;
+import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
 import jakarta.persistence.*;
 
 @Entity

@@ -3,6 +3,8 @@ package it.cs.unicam.ids.filiera.demo.services;
 
 import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
 import it.cs.unicam.ids.filiera.demo.entity.*;
+import it.cs.unicam.ids.filiera.demo.factory.FactoryUtente;
+import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
 import it.cs.unicam.ids.filiera.demo.model.Sessione;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 import jakarta.servlet.http.HttpSession;

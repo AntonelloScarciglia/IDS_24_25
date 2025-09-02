@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static it.cs.unicam.ids.filiera.demo.entity.FactoryUtente.ruoloOf;
-
 @Service
 @Transactional
 @RequiredArgsConstructor

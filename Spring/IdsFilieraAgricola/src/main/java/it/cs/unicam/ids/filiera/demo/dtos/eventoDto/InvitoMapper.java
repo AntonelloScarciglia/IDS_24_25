@@ -4,7 +4,7 @@ import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
 
-import static it.cs.unicam.ids.filiera.demo.entity.FactoryUtente.ruoloOf;
+import static it.cs.unicam.ids.filiera.demo.factory.FactoryUtente.ruoloOf;
 
 public class InvitoMapper {
     public static InvitoDTO toDTO(Invito inv) {
