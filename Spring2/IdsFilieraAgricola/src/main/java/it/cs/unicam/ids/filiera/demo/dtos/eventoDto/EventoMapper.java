@@ -25,8 +25,7 @@ public class EventoMapper {
         Integer postiRimanenti = illimitato
                 ? null
                 : Math.max(0, e.getCapienzaMax() - partecipantiCount);
-        // Se nella tua entity hai già e.getPostiRimasti(), puoi usare:
-        // Integer postiRimanenti = illimitato ? null : e.getPostiRimasti();
+
 
         return new EventoDTO(
                 e.getId(),
@@ -63,12 +62,12 @@ public class EventoMapper {
         e.setDataFine(dto.dataFine());
 
         if (dto.illimitato()) {
-            // Convenzione: 0 => illimitato
+            //0 => illimitato
             e.setPostiDisponibili(0);
         } else {
-            // Usa capienzaMax (nuovo nome campo nel DTO)
             Integer capienza = dto.capienzaMax();
             e.setPostiDisponibili(capienza != null ? capienza : 0);
         }
     }
 }
+
