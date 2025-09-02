@@ -36,9 +36,15 @@ public class AcquistoService {
 	}
 
 	public String acquista(HttpSession session) {
-		gestionaleService.aggiungiOrdine(session);
-		return "Ordine effettuato con successo";
+		try {
+			gestionaleService.aggiungiOrdine(session);
+			return "Ordine effettuato con successo";
+		} catch (Exception e) {
+			e.printStackTrace(); // Log in console
+			return "Errore durante l'acquisto: " + e.getMessage();
+		}
 	}
+
 
 	public Carrello getCarrello(HttpSession session) {
 		return gestionaleService.getCarrello(session);

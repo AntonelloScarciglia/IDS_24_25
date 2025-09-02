@@ -12,6 +12,7 @@ import java.util.Objects;
 @DiscriminatorValue("BASE")
 public class Prodotto {
 
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -25,6 +26,9 @@ public class Prodotto {
 	@Column(precision = 12, scale = 2)
 	private BigDecimal prezzo;
 
+	@Column(nullable = false)
+	private boolean confermato = false; // default: non confermato
+
 	@Column(name = "data_scadenza")
 	private LocalDate dataScadenza;
 
@@ -32,17 +36,20 @@ public class Prodotto {
 	private boolean attesa = true; // default: in attesa
 
 	// Costruttore JPA
-	public Prodotto() {}
+	public Prodotto() {
 
-	public Prodotto(Long venditoreId, String nome, String categoria,
-					BigDecimal prezzo, LocalDate dataScadenza) {
+	}
+
+	public Prodotto(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
 		this.venditoreId = venditoreId;
 		this.nome = nome;
 		this.categoria = categoria;
 		this.prezzo = prezzo;
 		this.dataScadenza = dataScadenza;
-		this.attesa = true; // default
+		this.attesa = true;
+		this.confermato = false; // 👈 AGGIUNGI QUESTO
 	}
+
 
 	// Getter / Setter
 	public Long getId() { return id; }
@@ -70,6 +77,14 @@ public class Prodotto {
 		if (this == o) return true;
 		if (!(o instanceof Prodotto other)) return false;
 		return id != null && id.equals(other.id);
+	}
+
+	public boolean isConfermato() {
+		return confermato;
+	}
+
+	public void setConfermato(boolean confermato) {
+		this.confermato = confermato;
 	}
 
 	@Override

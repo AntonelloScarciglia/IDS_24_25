@@ -56,7 +56,7 @@ public class GestionaleController {
 				.body(ordine);
 	}
 
-	// Error handling semplice
+
 	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
 	public ResponseEntity<String> handleBadRequest(RuntimeException ex) {
 		return ResponseEntity.badRequest().body(ex.getMessage());
@@ -68,5 +68,8 @@ public class GestionaleController {
 	public String ping() {
 		return "OK - Gestionale attivo!";
 	}
+
+
+
 
 }

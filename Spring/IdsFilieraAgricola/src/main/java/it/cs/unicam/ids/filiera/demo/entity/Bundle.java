@@ -5,39 +5,49 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @DiscriminatorValue("BUNDLE")
 public class Bundle extends Prodotto {
 
-	@ManyToMany
-	@JoinTable(
-			name = "bundle_prodotti",
-			joinColumns = @JoinColumn(name = "bundle_id"),
-			inverseJoinColumns = @JoinColumn(name = "prodotto_id")
-	)
-	private List<Prodotto> prodotti = new ArrayList<>();
+	@OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<BundleItem> items = new ArrayList<>();
+
 	private boolean isBundle;
 
-	// costruttore  JPA
-	protected Bundle() {
+	@Column(nullable = false)
+	private boolean confermato = false;
 
-	}
+
+	protected Bundle() {}
 
 	public Bundle(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
 		super(venditoreId, nome, categoria, prezzo, dataScadenza);
 	}
 
-	public List<Prodotto> getProdotti() {
-		return prodotti;
+	public void aggiungiItem(Prodotto prodotto, int quantita) {
+		this.items.add(new BundleItem(this, prodotto, quantita));
 	}
 
-	public void setProdotti(List<Prodotto> prodotti) {
-		this.prodotti = prodotti;
+	public List<BundleItem> getItems() {
+		return items;
 	}
 
-	public boolean isBundle() { return isBundle; }
+	public boolean isBundle() {
+		return isBundle;
+	}
 
-	public void setBundle(boolean bundle) { this.isBundle = bundle; }
+	public boolean isConfermato() {
+		return confermato;
+	}
+
+	public void setConfermato(boolean confermato) {
+		this.confermato = confermato;
+	}
+
+	public void setBundle(boolean bundle) {
+		this.isBundle = bundle;
+	}
 }

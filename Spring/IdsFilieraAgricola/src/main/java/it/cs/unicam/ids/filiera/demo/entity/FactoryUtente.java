@@ -13,6 +13,18 @@ public final class FactoryUtente {
             case PRODUTTORE    -> new Produttore(nome, cognome, email, password, codiceFiscale);
             case TRASFORMATORE -> new Trasformatore(nome, cognome, email, password, codiceFiscale);
             case DISTRIBUTORE  -> new Distributore(nome, cognome, email, password, codiceFiscale);
+            case ACQUIRENTE    -> new Acquirente(nome, cognome, email, password);
+            case ANIMATORE     -> new Animatore(nome, cognome, email, password);
         };
+    }
+
+    public static String ruoloOf(UtenteVerificato u) {
+        if (u.getRuolo() != null) return u.getRuolo().name();
+        if (u instanceof Produttore) return "PRODUTTORE";
+        if (u instanceof Trasformatore) return "TRASFORMATORE";
+        if (u instanceof Distributore) return "DISTRIBUTORE";
+        if (u instanceof Animatore) return "ANIMATORE";
+        if (u instanceof Acquirente) return "ACQUIRENTE";
+        return null;
     }
 }

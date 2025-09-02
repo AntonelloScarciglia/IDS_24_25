@@ -1,6 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 
 import java.io.Serializable;
@@ -27,6 +28,7 @@ public class Carrello implements Serializable {
 
 	public void svuota() { righe.clear(); }
 
+	@JsonIgnore
 	public boolean isVuoto() { return righe.isEmpty(); }
 
 	public Collection<RigaCarrello> getRighe() { return righe.values(); }

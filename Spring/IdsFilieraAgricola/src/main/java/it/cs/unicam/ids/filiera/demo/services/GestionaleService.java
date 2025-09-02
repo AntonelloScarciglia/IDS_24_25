@@ -1,5 +1,6 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
+import it.cs.unicam.ids.filiera.demo.entity.Acquirente;
 import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
@@ -103,4 +104,16 @@ public class GestionaleService {
 		return getOrCreate(session).getCarrello();
 	}
 
+	public void loginFittizio(HttpSession session) {
+		UtenteVerificato utenteFinto = new Acquirente("Mario", "Rossi", "mario@example.com", "password");
+		session.setAttribute("utente", utenteFinto);
+
+		Sessione s = getOrCreate(session);
+		s.setUtente(utenteFinto);
+		session.setAttribute(SESSIONE_KEY, s);
+	}
+
+
+
 }
+

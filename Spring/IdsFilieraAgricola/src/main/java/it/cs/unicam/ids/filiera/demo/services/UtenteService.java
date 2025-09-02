@@ -1,10 +1,15 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
+
 import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
 import it.cs.unicam.ids.filiera.demo.entity.*;
+import it.cs.unicam.ids.filiera.demo.model.Sessione;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import it.cs.unicam.ids.filiera.demo.repositories.OrdineRepository;
+
 
 import java.util.List;
 @Service
@@ -12,12 +17,21 @@ public class UtenteService {
 
 	private final UtenteRepository utenteRepository;
 	private final ProdottoService prodottoService;
+	private final GestionaleService gestionaleService;
+	private final OrdineRepository ordineRepository;
+
+
 
 	@Autowired
-	public UtenteService(UtenteRepository utenteRepository, ProdottoService prodottoService) {
+	public UtenteService(GestionaleService gestionaleService,
+                         UtenteRepository utenteRepository,
+                         ProdottoService prodottoService,
+						 OrdineRepository ordineRepository) {
+		this.gestionaleService = gestionaleService;
 		this.utenteRepository = utenteRepository;
 		this.prodottoService = prodottoService;
-	}
+        this.ordineRepository = ordineRepository;
+    }
 
 	public String registrati(String nome, String cognome, String email, String password) {
 		Acquirente utente = new Acquirente(nome, cognome, email, password);
@@ -58,6 +72,63 @@ public class UtenteService {
 	public List<Prodotto> prodottiPosseduti(int idVenditore) {
 		return prodottoService.getProdotti(idVenditore);
 	}
+
+	public void loginFittizio(HttpSession session) {
+		Acquirente utenteFinto = new Acquirente("Mario", "Rossi", "mario@example.com", "password");
+		utenteFinto = utenteRepository.save(utenteFinto);
+
+		session.setAttribute("utente", utenteFinto);
+
+		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+		s.setUtente(utenteFinto);
+		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+	}
+
+	public void loginAnimatoreFittizio(HttpSession session) {
+		UtenteVerificato animatoreFinto = FactoryUtente.createUser(Ruolo.ANIMATORE,
+				"Fabrizio",
+				"Romano",
+				"fabrizioromano@example.com",
+				"psw" ,
+				null);
+		utenteRepository.save(animatoreFinto);
+
+		session.setAttribute("animatore", animatoreFinto);
+
+		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+		s.setUtente(animatoreFinto);
+		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+	}
+
+	public void loginVenditoreFittizio(HttpSession session) {
+		UtenteVerificato venditoreFinto = FactoryUtente.createUser(Ruolo.PRODUTTORE,
+				"Nico",
+				"Schira",
+				"nicoschira@example.com",
+				"psw" ,
+				null);
+		utenteRepository.save(venditoreFinto);
+		session.setAttribute("utente", venditoreFinto);
+		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+		s.setUtente(venditoreFinto);
+		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+	}
+
+
+
+	public List<Ordine> ordiniUtente(HttpSession session) {
+		Sessione s = gestionaleService.newSessione(session); // oppure getOrCreate
+		UtenteVerificato utente = s.getUtente();
+
+		if (utente == null)
+			throw new IllegalStateException("Utente non presente nella sessione");
+
+		return ordineRepository.findByAcquirenteId(utente.getId());
+
+	}
+
+
+
 }
 
 

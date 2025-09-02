@@ -3,12 +3,13 @@ package it.cs.unicam.ids.filiera.demo.dtos;
 import it.cs.unicam.ids.filiera.demo.entity.Bundle;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.ProdottoTrasformato;
+import org.hibernate.Hibernate;
 
 import java.util.List;
+import it.cs.unicam.ids.filiera.demo.entity.BundleItem;
 
 public class ProdottoMapper {
 
-    /** Entity → DTO (gestione polimorfica) */
     public static ProdottoDTO inDTO(Prodotto p) {
         if (p == null) return null;
 
@@ -25,11 +26,14 @@ public class ProdottoMapper {
             metodo = pt.getMetodoTrasformazione();
         } else if (p instanceof Bundle pb) {
             tipo = "BUNDLE";
-            componenti = pb.getProdotti() == null
-                    ? List.of()
-                    : pb.getProdotti().stream()
-                    .map(Prodotto::getId)
-                    .toList();
+
+            if (Hibernate.isInitialized(pb.getItems()) && pb.getItems() != null) {
+                componenti = pb.getItems().stream()
+                        .flatMap(item -> java.util.Collections.nCopies(item.getQuantita(), item.getProdotto().getId()).stream())
+                        .toList();
+            } else {
+                componenti = List.of();
+            }
         }
 
         return new ProdottoDTO(
@@ -47,7 +51,6 @@ public class ProdottoMapper {
         );
     }
 
-    /** DTO → Entity (creazione grezza — i componenti per i bundle li aggiungi nel Service) */
     public static Prodotto inEntity(ProdottoDTO dto) {
         if (dto == null) return null;
 

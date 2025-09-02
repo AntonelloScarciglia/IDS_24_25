@@ -2,80 +2,66 @@ package it.cs.unicam.ids.filiera.demo.services;
 
 import it.cs.unicam.ids.filiera.demo.dtos.*;
 import it.cs.unicam.ids.filiera.demo.entity.Bundle;
+import it.cs.unicam.ids.filiera.demo.entity.BundleItem;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.ProdottoTrasformato;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-// Il servizio ProdottoService gestisce la logica di business relativa ai prodotti.
 public class ProdottoService {
 
     @Autowired
     private ProdottoRepository prodottoRepository;
 
-    /**
-     *crea un nuovo prodotto base
-     * @param dtoProd
-     */
     public String newProdotto(ProdottoDTO dtoProd) {
-        Prodotto prodotto = ProdottoMapper.inEntity(dtoProd); // mapping DTO → Entity
+        if (dtoProd.venditoreId() == null) {
+            throw new IllegalArgumentException("Il campo venditoreId è obbligatorio");
+        }
+
+        boolean campiTrasf = dtoProd.prodottoBaseId() != null
+                || (dtoProd.certificato() != null && !dtoProd.certificato().isBlank())
+                || (dtoProd.metodoTrasformazione() != null && !dtoProd.metodoTrasformazione().isBlank());
+
+        boolean tipoNonBase = dtoProd.tipo() != null
+                && !dtoProd.tipo().equalsIgnoreCase("BASE");
+
+        if (campiTrasf || tipoNonBase) {
+            throw new IllegalArgumentException("Per prodotti trasformati/bundle usa le rotte dedicate.");
+        }
+
+        Prodotto prodotto = ProdottoMapper.inEntity(dtoProd);
         prodotto.setAttesa(true);
         prodottoRepository.save(prodotto);
         return "Prodotto creato con ID: " + prodotto.getId();
     }
 
-
-    /**
-     * aggiunge il prodotto in repo
-     * @param prodotto
-     */
     public Prodotto salvaProdotto(Prodotto prodotto) {
         return prodottoRepository.save(prodotto);
     }
 
-    /**
-     * elimina il prodotto dalla repo
-     * @param id
-     */
     public Prodotto rimuoviProdotto(int id) {
-        Long prodottoId = (long) id;
-        Prodotto prodotto = prodottoRepository.findById(prodottoId)
-                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato con ID: " + id));
+        Prodotto prodotto = visualizzaProdotto(id);
         prodottoRepository.delete(prodotto);
         return prodotto;
     }
 
-
-    /**
-     * to string prodotto
-     * @param id
-     */
     public Prodotto visualizzaProdotto(int id) {
         return prodottoRepository.findById((long) id)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato con ID: " + id));
     }
 
-    /**
-     * ritorna tutti i prodotti in stato approvato
-     * @return
-     */
     public List<Prodotto> visualizzaTuttiProdotti() {
         return prodottoRepository.findAll();
     }
 
-
-
-
-    /**
-     *cambia nome e prezzo prodotto
-     * @param nome
-     * @param prezzo
-     */
     public Prodotto aggiornaProdotto(int id, String nome, BigDecimal prezzo) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodotto.setNome(nome);
@@ -83,69 +69,95 @@ public class ProdottoService {
         return prodottoRepository.save(prodotto);
     }
 
-
-    /**
-     * chiama repo per ottenere tutti i prodotti filtrati lutente con id
-     * @param id
-     */
     public List<Prodotto> visualizzaProdottiUtente(int id) {
         return prodottoRepository.findAll().stream()
                 .filter(p -> p.getVenditoreId() != null && p.getVenditoreId().equals((long) id))
                 .toList();
     }
 
-
-
-
-    /**
-     * Crea un prodotto trasformato a partire da un DTO, imposta lo stato in attesa e lo salva.
-     */
-    public Prodotto newProdottoTrasformato(ProdottoDTO dtoProdTrasf) {
-        Prodotto prodotto = ProdottoMapper.inEntity(dtoProdTrasf);
-
-        if (!(prodotto instanceof ProdottoTrasformato pt)) {
-            throw new IllegalArgumentException("Il DTO fornito non rappresenta un prodotto trasformato.");
+    public Prodotto newProdottoTrasformato(ProdottoTrasformatoDTO dto) {
+        if (dto.venditoreId() == null || dto.prodottoBaseId() == null) {
+            throw new IllegalArgumentException("Dati obbligatori mancanti.");
         }
 
-        pt.setAttesa(true); // Imposta lo stato di attesa
+        Prodotto base = prodottoRepository.findById(dto.prodottoBaseId())
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto base non trovato."));
+
+        if (base instanceof ProdottoTrasformato || base instanceof Bundle) {
+            throw new IllegalArgumentException("Il prodotto base deve essere di tipo BASE.");
+        }
+
+        ProdottoTrasformato pt = new ProdottoTrasformato(
+                dto.venditoreId(), dto.nome(), dto.categoria(), dto.prezzo(),
+                dto.dataScadenza(), dto.prodottoBaseId(), dto.certificato(), dto.metodoTrasformazione()
+        );
+        pt.setAttesa(true);
         return prodottoRepository.save(pt);
     }
 
-
-    /**
-     *
-     * @param bundleId
-     * @param prodottoId
-     * @return
-     */
+    @Transactional
     public Prodotto aggiungiProdottoBundle(Long bundleId, Long prodottoId) {
-
-        Bundle bundle = (Bundle) prodottoRepository.findById(bundleId)
+        Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
+
+        if (!bundle.isAttesa()) {
+            throw new IllegalStateException("Bundle confermato: non modificabile.");
+        }
+
         Prodotto prodotto = prodottoRepository.findById(prodottoId)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
 
-        bundle.getProdotti().add(prodotto);
+        // ✅ BLOCCO: non puoi inserire un bundle dentro un altro bundle
+        if (prodotto instanceof Bundle) {
+            throw new IllegalArgumentException("Non è possibile inserire un bundle dentro un altro bundle.");
+        }
+
+        // Verifica se già esiste e aggiorna quantità
+        Optional<BundleItem> esistente = bundle.getItems().stream()
+                .filter(item -> item.getProdotto().getId().equals(prodottoId))
+                .findFirst();
+
+        if (esistente.isPresent()) {
+            esistente.get().incrementaQuantita(); // metodo da definire in BundleItem
+        } else {
+            bundle.aggiungiItem(prodotto, 1);
+        }
+
+        aggiornaPrezzoBundle(bundle);
         return prodottoRepository.save(bundle);
     }
 
 
-    /**
-     *filtro er ottenre i prodotti on id inserito
-     * @param idVenditore
-     */
+    @Transactional
+    public Prodotto rimuoviProdottoDaBundle(Long bundleId, Long prodottoId) {
+        Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
+        if (!bundle.isAttesa()) throw new IllegalStateException("Bundle confermato: non modificabile.");
+
+        bundle.getItems().removeIf(item -> item.getProdotto().getId().equals(prodottoId));
+        aggiornaPrezzoBundle(bundle);
+        return prodottoRepository.save(bundle);
+    }
+
     public List<Prodotto> getProdotti(int idVenditore) {
         return prodottoRepository.findAll().stream()
                 .filter(p -> p.getVenditoreId() != null && p.getVenditoreId().equals((long) idVenditore))
                 .toList();
     }
 
-
-    /**
-     * prende la lista del buundle il prezzo e il nome
-     */
     public Prodotto newBundle(BundleDTO dto) {
-        Bundle bundle = new Bundle(
+        if (dto.venditoreId() == null) {
+            throw new IllegalArgumentException("Il venditoreId è obbligatorio.");
+        }
+
+        // Verifica se il venditore ha già un bundle in attesa
+        Optional<Bundle> esistente = prodottoRepository.findBundleInAttesaByVenditoreId(dto.venditoreId());
+        if (esistente.isPresent()) {
+            throw new IllegalStateException("Hai già un bundle in attesa. Confermalo prima di crearne un altro.");
+        }
+
+        // Crea il nuovo bundle vuoto
+        Bundle nuovo = new Bundle(
                 dto.venditoreId(),
                 dto.nome(),
                 dto.categoria(),
@@ -153,32 +165,50 @@ public class ProdottoService {
                 dto.dataScadenza()
         );
 
-        bundle.setAttesa(true);       // come per tutti i nuovi prodotti
-        bundle.setBundle(true);       // segna che è un bundle
+        nuovo.setAttesa(true); // Lo stato iniziale è "in attesa"
+        return prodottoRepository.save(nuovo);
+    }
 
-        // I prodotti verranno aggiunti dopo, in un altro metodo
+
+    private void aggiornaPrezzoBundle(Bundle bundle) {
+        BigDecimal totale = bundle.getItems().stream()
+                .map(item -> item.getProdotto().getPrezzo().multiply(BigDecimal.valueOf(item.getQuantita())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        bundle.setPrezzo(totale);
+    }
+
+    @Transactional
+    public Prodotto confermaBundle(Long bundleId) {
+        Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
+
+        if (bundle.isConfermato()) {
+            throw new IllegalStateException("Il bundle è già stato confermato.");
+        }
+
+        if (bundle.getItems() == null || bundle.getItems().isEmpty()) {
+            throw new IllegalStateException("Impossibile confermare: il bundle è vuoto.");
+        }
+
+        BigDecimal totale = bundle.getItems().stream()
+                .map(item -> item.getProdotto().getPrezzo().multiply(BigDecimal.valueOf(item.getQuantita())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        bundle.setPrezzo(totale);
+
+        bundle.setConfermato(true);
+        bundle.setAttesa(false);
+
         return prodottoRepository.save(bundle);
     }
 
 
 
-
-    /**
-     * impostata lo stato del prodotto in attesa true o false
-     * @param attesa
-     */
     public Prodotto setStato(int id, boolean attesa) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodotto.setAttesa(attesa);
         return prodottoRepository.save(prodotto);
     }
 
-
-
-    /**
-     * ritorna i prodotti in attesa con stato non approvato
-     * @return
-     */
     public List<Prodotto> getProdottiInAttesa() {
         return prodottoRepository.findAll().stream()
                 .filter(Prodotto::isAttesa)
@@ -187,7 +217,7 @@ public class ProdottoService {
 
     public Prodotto approvaProdotto(int id) {
         Prodotto prodotto = visualizzaProdotto(id);
-        prodotto.setAttesa(false); // approvato
+        prodotto.setAttesa(false);
         return prodottoRepository.save(prodotto);
     }
 
@@ -197,12 +227,41 @@ public class ProdottoService {
         return prodotto;
     }
 
+    public List<ProdottoDTO> visualizzaTuttiProdottiDTO() {
+        List<Prodotto> prodottiNormali = prodottoRepository.findAll().stream()
+                .filter(p -> !(p instanceof Bundle))
+                .toList();
+        List<Bundle> bundles = prodottoRepository.findTuttiIBundleConProdotti();
+
+        List<ProdottoDTO> result = new ArrayList<>();
+        prodottiNormali.forEach(p -> result.add(ProdottoMapper.inDTO(p)));
+        bundles.forEach(b -> result.add(ProdottoMapper.inDTO(b)));
+        return result;
+    }
+
+    public List<ProdottoDTO> visualizzaProdottiApprovatiDTO() {
+        List<Prodotto> prodottiNormali = prodottoRepository.findByAttesaFalse().stream()
+                .filter(p -> !(p instanceof Bundle))
+                .toList();
+        List<Bundle> bundles = prodottoRepository.findBundleConfermatiConProdotti();
+
+        List<ProdottoDTO> result = new ArrayList<>();
+        prodottiNormali.forEach(p -> result.add(ProdottoMapper.inDTO(p)));
+        bundles.forEach(b -> result.add(ProdottoMapper.inDTO(b)));
+        return result;
+    }
 
 
-    /**
-     *
-     * @param prod
-     */
+    @Transactional(readOnly = true)
+    public Bundle visualizzaBundleConItems(Long id) {
+        return prodottoRepository.findBundleWithItems(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato con ID: " + id));
+    }
+
+
+
+
+
     public String toStringProdotto(Prodotto prod) {
         String base = "Prodotto{id=%d, tipo=%s, nome='%s', categoria='%s', prezzo=%.2f, scadenza=%s, attesa=%s}"
                 .formatted(
@@ -222,12 +281,16 @@ public class ProdottoService {
 
         if (prod instanceof Bundle bundle) {
             return base + " [componenti=%s]"
-                    .formatted(bundle.getProdotti().stream()
-                            .map(p -> p.getId().toString())
+                    .formatted(bundle.getItems().stream()
+                            .map(item -> "(id=%d x%d)".formatted(item.getProdotto().getId(), item.getQuantita()))
                             .toList());
         }
 
         return base;
     }
+
+
+
+
 
 }
