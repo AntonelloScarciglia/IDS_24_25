@@ -93,6 +93,16 @@ public class UtenteController {
 		return ResponseEntity.ok("Login animatore fittizio completato");
 	}
 
+	@PostMapping("/login-venditore-test")
+	public ResponseEntity<String> loginVenditoreFittizio(HttpSession session) {
+		utenteService.loginVenditoreFittizio(session);
+		return ResponseEntity.ok("Login venditore fittizio completato");
+	}
+
+
+
+
+
 	// per testare chi è l'utente in sessione
 	@GetMapping("/whoami")
 	public ResponseEntity<?> whoAmI(HttpSession session) {

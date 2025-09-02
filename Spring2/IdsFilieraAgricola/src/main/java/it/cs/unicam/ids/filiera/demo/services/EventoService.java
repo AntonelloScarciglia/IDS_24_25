@@ -3,22 +3,23 @@ package it.cs.unicam.ids.filiera.demo.services;
 import it.cs.unicam.ids.filiera.demo.dtos.eventoDto.EventoDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.eventoDto.EventoMapper;
 import it.cs.unicam.ids.filiera.demo.entity.Animatore;
-import it.cs.unicam.ids.filiera.demo.entity.Evento;
-import it.cs.unicam.ids.filiera.demo.entity.Ruolo;
+import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@Transactional //
+@Transactional
 public class EventoService {
 
-    @Autowired
-    private EventoRepository eventoRepository;
+    private final EventoRepository eventoRepository;
+
+    public EventoService(EventoRepository eventoRepository) {
+        this.eventoRepository = eventoRepository;
+    }
 
 
     /* =========================================

@@ -93,12 +93,27 @@ public class UtenteService {
 				null);
 		utenteRepository.save(animatoreFinto);
 
-		session.setAttribute("utente", animatoreFinto);
+		session.setAttribute("animatore", animatoreFinto);
 
 		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
 		s.setUtente(animatoreFinto);
 		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
 	}
+
+	public void loginVenditoreFittizio(HttpSession session) {
+		UtenteVerificato venditoreFinto = FactoryUtente.createUser(Ruolo.PRODUTTORE,
+				"Nico",
+				"Schira",
+				"nicoschira@example.com",
+				"psw" ,
+				null);
+		utenteRepository.save(venditoreFinto);
+		session.setAttribute("utente", venditoreFinto);
+		Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+		s.setUtente(venditoreFinto);
+		session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+	}
+
 
 	public List<Ordine> ordiniUtente(HttpSession session) {
 		Sessione s = gestionaleService.newSessione(session); // oppure getOrCreate

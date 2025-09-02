@@ -49,12 +49,8 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.eliminaEvento(u, id));
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<String> handleBadRequest(RuntimeException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
 
-    // Utility: estrae l'utente applicativo dalla HttpSession
+    // Utility: estrae l'utente dalla HttpSession
     private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
         Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
         if (s == null || s.getUtente() == null) {

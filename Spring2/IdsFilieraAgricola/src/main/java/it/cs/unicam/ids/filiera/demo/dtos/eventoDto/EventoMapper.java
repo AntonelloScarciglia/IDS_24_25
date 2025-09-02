@@ -1,24 +1,32 @@
 package it.cs.unicam.ids.filiera.demo.dtos.eventoDto;
 
-import it.cs.unicam.ids.filiera.demo.dtos.eventoDto.EventoDTO;
-import it.cs.unicam.ids.filiera.demo.entity.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 
 import java.util.List;
 
 public class EventoMapper {
+
     public static EventoDTO toDto(Evento e) {
         if (e == null) return null;
 
-        boolean illimitato = e.getPostiDisponibili() <= 0;
-        Integer posti = illimitato ? null : e.getPostiDisponibili();
+        boolean illimitato = e.getCapienzaMax() <= 0;
+        Integer capienzaMax = illimitato ? null : e.getCapienzaMax();
 
         List<UtenteVerificato> partecipanti = e.getPartecipanti();
-        int count = partecipanti == null ? 0 : partecipanti.size();
-        List<Long> ids = partecipanti == null ? List.of()
+        int partecipantiCount = (partecipanti == null) ? 0 : partecipanti.size();
+        List<Long> partecipantiIds = (partecipanti == null)
+                ? List.of()
                 : partecipanti.stream().map(UtenteVerificato::getId).toList();
 
         Long creatoreId = (e.getCreatore() != null) ? e.getCreatore().getId() : null;
+
+        // Calcolo dei posti rimanenti (se illimitato → null)
+        Integer postiRimanenti = illimitato
+                ? null
+                : Math.max(0, e.getCapienzaMax() - partecipantiCount);
+        // Se nella tua entity hai già e.getPostiRimasti(), puoi usare:
+        // Integer postiRimanenti = illimitato ? null : e.getPostiRimasti();
 
         return new EventoDTO(
                 e.getId(),
@@ -28,10 +36,11 @@ public class EventoMapper {
                 e.getDataInizio(),
                 e.getDataFine(),
                 illimitato,
-                posti,
-                count,
+                capienzaMax,
+                postiRimanenti,
+                partecipantiCount,
                 creatoreId,
-                ids
+                partecipantiIds
         );
     }
 
@@ -46,16 +55,20 @@ public class EventoMapper {
     /** update dei campi modificabili (creatore NON viene toccato) */
     public static void applicaModifica(Evento e, EventoDTO dto) {
         if (e == null || dto == null) return;
+
         e.setTitolo(dto.titolo());
         e.setDescrizione(dto.descrizione());
         e.setLuogo(dto.luogo());
         e.setDataInizio(dto.dataInizio());
         e.setDataFine(dto.dataFine());
+
         if (dto.illimitato()) {
+            // Convenzione: 0 => illimitato
             e.setPostiDisponibili(0);
         } else {
-            Integer posti = dto.postiDisponibili();
-            e.setPostiDisponibili(posti != null ? posti : 0);
+            // Usa capienzaMax (nuovo nome campo nel DTO)
+            Integer capienza = dto.capienzaMax();
+            e.setPostiDisponibili(capienza != null ? capienza : 0);
         }
     }
 }
