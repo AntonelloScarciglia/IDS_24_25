@@ -131,6 +131,19 @@ public class UtenteService {
 
     }
 
+    public List<String> visualizzaNotifiche(UtenteVerificato utenteCorrente) {
+		return utenteRepository.findById(utenteCorrente.getId()).get().getNotifiche().stream().toList();
+	}
+
+	public String svuotaNotifiche(UtenteVerificato utenteCorrente){
+		UtenteVerificato utente = utenteRepository.findById(utenteCorrente.getId())
+				.orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
+
+		utente.getNotifiche().clear();
+		utenteRepository.save(utente);
+		return "Lista notifiche svuotata";
+	}
+
     public List<UtenteDTO> visualizzaVenditori() {
 
 
