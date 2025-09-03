@@ -23,6 +23,8 @@ import java.util.List;
 public class UtenteController {
 
     private final UtenteService utenteService;
+	private Sessione sessione;
+
 
     @Autowired
     public UtenteController(UtenteService utenteService) {
@@ -59,7 +61,7 @@ public class UtenteController {
      * Visualizza info utente.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> visualizzaUtente(@PathVariable int id) {
+    public ResponseEntity<?> RichiestaVisualizzaUtente(@PathVariable int id) {
         return ResponseEntity.ok(utenteService.visualizzaUtente(id));
     }
 
@@ -67,7 +69,7 @@ public class UtenteController {
      * Restituisce prodotti posseduti da un venditore.
      */
     @GetMapping("/{id}/prodotti")
-    public ResponseEntity<List<Prodotto>> prodottiUtente(@PathVariable int id) {
+    public ResponseEntity<List<Prodotto>> RichiestaProdottiUtente(@PathVariable int id) {
         return ResponseEntity.ok(utenteService.prodottiPosseduti(id));
     }
 
@@ -76,10 +78,21 @@ public class UtenteController {
      * Restituisce gli ordini dell'utente in sessione.
      */
     @GetMapping("/ordini")
-    public ResponseEntity<List<Ordine>> getOrdiniUtente(HttpSession session) {
+    public ResponseEntity<List<Ordine>> RichiestaGetOrdiniUtente(HttpSession session) {
         List<Ordine> ordini = utenteService.ordiniUtente(session);
         return ResponseEntity.ok(ordini);
     }
+
+	@GetMapping("/notifiche/visualizza")
+	public ResponseEntity<List<String>> RichiestaVisualizzaNotifiche(){
+		List<String> notifiche = utenteService.visualizzaNotifiche(this.sessione.getUtente());
+		return ResponseEntity.ok(notifiche);
+	}
+
+	@DeleteMapping("/notifiche/svuota")
+	public ResponseEntity<String> richiestaSvuotaNotifiche(){
+		return ResponseEntity.ok(utenteService.svuotaNotifiche(this.sessione.getUtente()));
+	}
 
     @PostMapping("/login-test")
     public ResponseEntity<String> loginFittizio(HttpSession session) {
@@ -130,5 +143,14 @@ public class UtenteController {
 	@GetMapping("/venditori")
 	public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaVenditori() {
 		return ResponseEntity.ok(utenteService.visualizzaVenditori());
+	}
+
+	// Utility: estrae l'utente dalla HttpSession
+	private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
+		Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
+		if (s == null || s.getUtente() == null) {
+			throw new IllegalStateException("Utente non presente in sessione");
+		}
+		return s.getUtente();
 	}
 }
