@@ -8,11 +8,14 @@ import it.cs.unicam.ids.filiera.demo.entity.Venditore;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.InvitoStato;
+import it.cs.unicam.ids.filiera.demo.observer.Observer;
+import it.cs.unicam.ids.filiera.demo.observer.ObserverManager;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.InvitoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,14 +32,16 @@ public class InvitoService {
     private final InvitoRepository invitoRepo;
     private final EventoRepository eventoRepo;
     private final UtenteRepository utenteRepo;
+    @Autowired
+    private ObserverManager observer;
 
-    public List<InvitoDTO> creaInvito(UtenteVerificato creatore, Long eventoId, RichiestaInvitoDTO dto) {
+    public List<InvitoDTO> creaInvito(UtenteVerificato utente, Long eventoId, RichiestaInvitoDTO dto) {
         // 1) Carico l'evento dal DB o lancio eccezione se non esiste
         Evento evento = eventoRepo.findById(eventoId)
                 .orElseThrow(() -> new IllegalArgumentException("Evento non trovato"));
 
         // 2) Autorizzazione: solo il creatore dell'evento può inviare inviti
-        requireCreator(creatore, evento);
+        requireCreator(utente, evento);
 
         // impossibile invitare se l'evento è terminato
         ensureEventoNonTerminato(evento);
@@ -68,13 +73,22 @@ public class InvitoService {
             // 4. Creo e salvo il nuovo invito (in attesa by default)
             Invito inv = new Invito(evento, invitato, dto.messaggio());
             inv = invitoRepo.save(inv);
+            observer.notificaInvitoCreato(inv);
             risultati.add(InvitoMapper.toDTO(inv));
         }
         return risultati;
     }
 
-    public InvitoDTO eliminaInvito(Long id) {
-        throw new UnsupportedOperationException("Non implementato");
+    public String eliminaInvito(UtenteVerificato utente, Long id) {
+        var invito = invitoRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invito non trovato"));
+
+        // Autorizzazione: solo il creatore dell'evento può eliminare gli inviti
+        requireCreator(utente, invito.getEvento());
+
+        invitoRepo.delete(invito);
+        observer.notificaInvitoEliminato(invito);
+        return "Invito : " + invito.toString() + " eliminato";
     }
 
     /**
@@ -98,14 +112,21 @@ public class InvitoService {
         // impossibile rispondere se l'evento è terminato
         var evento = invito.getEvento();
         ensureEventoNonTerminato(evento);
+
         // azione: accetta o rifiuta
         azione = azione.toUpperCase();
         switch (azione) {
             case "ACCETTA" -> {
+                var evento = invito.getEvento();
                 evento.aggiungiPartecipante(utente); // <- aggiorna anche i posti disponibili
                 invito.setStato(InvitoStato.ACCETTATO);
+                //observer.aggiornaUtentiInviti(evento.getCreatore().getId(), "Invito accettato : " + invito.toString());
             }
-            case "RIFIUTA" -> invito.setStato(InvitoStato.RIFIUTATO);
+            case "RIFIUTA" -> {
+                invito.setStato(InvitoStato.RIFIUTATO);
+                //observer.aggiornaUtentiInviti(invito.getEvento().getCreatore().getId(), "Invito rifiutato : " + invito.toString());
+            }
+
             default -> throw new IllegalArgumentException("Azione non valida: " + azione);
         }
         return InvitoMapper.toDTO(invitoRepo.save(invito));
@@ -140,8 +161,8 @@ public class InvitoService {
     }
 
 
-    private void requireCreator(UtenteVerificato creatore, Evento evento) {
-        if (evento.getCreatore() == null || !evento.getCreatore().getId().equals(creatore.getId())) {
+    private void requireCreator(UtenteVerificato utente, Evento evento) {
+        if (evento.getCreatore() == null || !evento.getCreatore().getId().equals(utente.getId())) {
             throw new IllegalStateException("Operazione consentita solo al creatore dell'evento");
         }
     }
