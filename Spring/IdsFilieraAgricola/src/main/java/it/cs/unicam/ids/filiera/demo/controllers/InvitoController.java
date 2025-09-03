@@ -40,6 +40,12 @@ public class InvitoController {
         return ResponseEntity.ok(invitoService.creaInvito(u, eventoId, dto));
     }
 
+    @DeleteMapping("/eventi/invito/elimina/{invitoId}")
+    public ResponseEntity<String> richiestaEliminaInvito(@PathVariable Long invitoId, HttpSession session){
+        UtenteVerificato u = this.current(session);
+        return ResponseEntity.ok(invitoService.eliminaInvito(u, invitoId));
+    }
+
 
     /** Lista tutti inviti di un evento (solo creatore) */
     @GetMapping("/eventi/{eventoId}/inviti")
