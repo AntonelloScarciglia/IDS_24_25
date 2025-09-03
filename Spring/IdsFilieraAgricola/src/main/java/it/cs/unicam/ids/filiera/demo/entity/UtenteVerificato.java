@@ -1,6 +1,10 @@
 package it.cs.unicam.ids.filiera.demo.entity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -15,6 +19,14 @@ public abstract class UtenteVerificato {
     private String cognome;
     private String email;
     private String password;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "utente_notifiche",
+            joinColumns = @JoinColumn(name = "utente_id")
+    )
+    @Column(name = "notifica")
+    private List<String> notifiche = new ArrayList<>();
 
     @Column(name = "ruolo", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -49,5 +61,8 @@ public abstract class UtenteVerificato {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public Ruolo getRuolo() { return ruolo; }
+    public List<String> getNotifiche(){
+        return this.notifiche;
+    }
 
 }
