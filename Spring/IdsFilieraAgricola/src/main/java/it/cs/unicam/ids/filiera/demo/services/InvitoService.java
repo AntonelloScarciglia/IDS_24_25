@@ -110,8 +110,8 @@ public class InvitoService {
         }
 
         // impossibile rispondere se l'evento è terminato
-        var evento = invito.getEvento();
-        ensureEventoNonTerminato(evento);
+        var evento2 = invito.getEvento();
+        ensureEventoNonTerminato(evento2);
 
         // azione: accetta o rifiuta
         azione = azione.toUpperCase();
