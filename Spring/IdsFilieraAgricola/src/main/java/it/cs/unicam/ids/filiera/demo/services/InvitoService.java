@@ -15,6 +15,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +37,9 @@ public class InvitoService {
 
         // 2) Autorizzazione: solo il creatore dell'evento può inviare inviti
         requireCreator(creatore, evento);
+
+        // impossibile invitare se l'evento è terminato
+        ensureEventoNonTerminato(evento);
 
         // 3) Validazione input
         if (dto.idUtentiList() == null || dto.idUtentiList().isEmpty()) {
@@ -90,11 +95,13 @@ public class InvitoService {
             throw new IllegalStateException("Impossibile rispondere: invito già " + invito.getStato());
         }
 
+        // impossibile rispondere se l'evento è terminato
+        var evento = invito.getEvento();
+        ensureEventoNonTerminato(evento);
         // azione: accetta o rifiuta
         azione = azione.toUpperCase();
         switch (azione) {
             case "ACCETTA" -> {
-                var evento = invito.getEvento();
                 evento.aggiungiPartecipante(utente); // <- aggiorna anche i posti disponibili
                 invito.setStato(InvitoStato.ACCETTATO);
             }
@@ -138,4 +145,13 @@ public class InvitoService {
             throw new IllegalStateException("Operazione consentita solo al creatore dell'evento");
         }
     }
+
+    private void ensureEventoNonTerminato(Evento e) {
+        LocalDateTime now = LocalDateTime.now();
+        if (e.getDataFine() != null && e.getDataFine().isBefore(now)) {
+            String when = e.getDataFine().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            throw new IllegalStateException("Evento terminato il " + when);
+        }
+    }
+
 }

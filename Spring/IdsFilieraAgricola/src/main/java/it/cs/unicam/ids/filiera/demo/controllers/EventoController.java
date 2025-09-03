@@ -15,9 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/eventi")
 public class EventoController {
+    private final EventoService eventoService;
 
-    @Autowired
-    private EventoService eventoService;
+    public EventoController(EventoService eventoService) {
+        this.eventoService = eventoService;
+    }
 
     @GetMapping()
     public ResponseEntity<List<EventoDTO>> richiestaVisualizzaTuttiEventi() {
@@ -27,6 +29,12 @@ public class EventoController {
     @GetMapping("/{id}")
     public ResponseEntity<EventoDTO> richiestaVisualizzaEvento(@PathVariable Long id) {
         return ResponseEntity.ok(eventoService.visualizzaEvento(id));
+    }
+
+    @GetMapping("/miei")
+    public ResponseEntity<List<EventoDTO>> richiestaVisualizzaMieiEventi(HttpSession session) {
+        UtenteVerificato u = getUtenteCorrente(session);
+        return ResponseEntity.ok(eventoService.visualizzaMieiEventi(u));
     }
 
     @PostMapping("/crea")

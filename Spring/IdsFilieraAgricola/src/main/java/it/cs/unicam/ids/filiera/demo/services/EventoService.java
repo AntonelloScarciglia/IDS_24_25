@@ -40,12 +40,26 @@ public class EventoService {
         return EventoMapper.toDto(e);
     }
 
+    /**
+     * Visualizza gli eventi creati dall'animatore.
+     * Se l'animatore non ha creato eventi, viene lanciata un'eccezione.
+     */
+    @Transactional(readOnly = true)
+    public List<EventoDTO> visualizzaMieiEventi(UtenteVerificato animatore) {
+        controllaAnimatore(animatore);
+        List<Evento> eventi = eventoRepository.findByCreatoreId(animatore.getId());
+        if (eventi.isEmpty()) {
+            throw new IllegalStateException("L'animatore non ha creato eventi");
+        }
+        return eventi.stream()
+                .map(EventoMapper::toDto)
+                .toList();
+    }
 
     /* =========================================
         METODI DI SCRITTURA
-        =========================================
+       =========================================
      */
-
     public EventoDTO creaEvento(UtenteVerificato animatore, EventoDTO evento) {
         controllaAnimatore(animatore);
         Evento e = EventoMapper.toEntity(evento);
