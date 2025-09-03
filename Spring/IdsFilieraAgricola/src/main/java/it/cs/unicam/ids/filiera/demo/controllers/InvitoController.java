@@ -58,14 +58,14 @@ public class InvitoController {
 
     // Lista inviti ricevuti da un utente (utente in sessione)
     // GET /utenti/inviti/ricevuti
-    @GetMapping("/utenti/inviti/ricevuti")
+    @GetMapping("inviti/ricevuti")
     public ResponseEntity<List<InvitoDTO>> richiestaVisualizzaInvitiRicevuti(HttpSession session) {
         UtenteVerificato u = current(session);
         return ResponseEntity.ok(invitoService.getInvitiRicevuti(u));
     }
 
     /** RISPOSTA invito (ACCETTA|RIFIUTA) – solo invitato */
-    @PostMapping("/inviti/{invitoId}/azione/{azione}")
+    @PostMapping("/inviti/{invitoId}/{azione}")
     public ResponseEntity<InvitoDTO> richiestaRispondiInvito(@PathVariable Long invitoId,
                                                              @PathVariable String azione,
                                                              HttpSession session) {
