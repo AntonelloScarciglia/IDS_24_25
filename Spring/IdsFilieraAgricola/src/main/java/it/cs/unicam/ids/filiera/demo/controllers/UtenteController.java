@@ -114,15 +114,19 @@ public class UtenteController {
      * NOTIFICHE UTENTE
      * ==============================================================
      */
+
     @GetMapping("/notifiche/visualizza")
-    public ResponseEntity<List<String>> richiestaVisualizzaNotifiche() {
-        List<String> notifiche = utenteService.visualizzaNotifiche(this.sessione.getUtente());
+    public ResponseEntity<List<String>> richiestaVisualizzaNotifiche(HttpSession session) {
+        UtenteVerificato u = getUtenteCorrente(session);
+        List<String> notifiche = utenteService.visualizzaNotifiche(u);
+        utenteService.svuotaNotifiche(u);
         return ResponseEntity.ok(notifiche);
     }
 
     @DeleteMapping("/notifiche/svuota")
-    public ResponseEntity<String> richiestaSvuotaNotifiche() {
-        return ResponseEntity.ok(utenteService.svuotaNotifiche(this.sessione.getUtente()));
+    public ResponseEntity<String> richiestaSvuotaNotifiche(HttpSession session) {
+        UtenteVerificato u = getUtenteCorrente(session);
+        return ResponseEntity.ok(utenteService.svuotaNotifiche(u));
     }
 
 
