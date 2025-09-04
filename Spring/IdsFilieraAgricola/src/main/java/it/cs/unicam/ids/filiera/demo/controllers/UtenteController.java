@@ -118,10 +118,9 @@ public class UtenteController {
     @GetMapping("/notifiche/visualizza")
     public ResponseEntity<List<String>> richiestaVisualizzaNotifiche(HttpSession session) {
         UtenteVerificato u = getUtenteCorrente(session);
-        List<String> notifiche = utenteService.visualizzaNotifiche(u);
-        utenteService.svuotaNotifiche(u);
-        return ResponseEntity.ok(notifiche);
+        return ResponseEntity.ok(utenteService.visualizzaAndEliminaNotifiche(u));
     }
+
 
     @DeleteMapping("/notifiche/svuota")
     public ResponseEntity<String> richiestaSvuotaNotifiche(HttpSession session) {

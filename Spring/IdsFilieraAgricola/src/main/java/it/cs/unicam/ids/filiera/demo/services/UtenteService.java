@@ -138,6 +138,23 @@ public class UtenteService {
 
     }
 
+
+    public List<String> visualizzaAndEliminaNotifiche(UtenteVerificato utenteCorrente) {
+        UtenteVerificato utente = utenteRepository.findById(utenteCorrente.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
+
+        List<String> notificheDaRestituire = List.copyOf(utente.getNotifiche());
+
+        utente.getNotifiche().removeAll(notificheDaRestituire);
+
+        utenteRepository.save(utente);
+
+        return notificheDaRestituire;
+    }
+
+
+
+
     public List<String> visualizzaNotifiche(UtenteVerificato utenteCorrente) {
         return utenteRepository.findById(utenteCorrente.getId())
                 .get()
