@@ -8,71 +8,96 @@ import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import it.cs.unicam.ids.filiera.demo.model.Sessione;
+import it.cs.unicam.ids.filiera.demo.services.EventoService;
 import it.cs.unicam.ids.filiera.demo.services.GestionaleService;
 import it.cs.unicam.ids.filiera.demo.services.UtenteService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/utenti")
+@Validated
 public class UtenteController {
 
     private final UtenteService utenteService;
-	private Sessione sessione;
+    private final EventoService eventoService;
+    private Sessione sessione;
 
 
     @Autowired
-    public UtenteController(UtenteService utenteService) {
+    public UtenteController(UtenteService utenteService, EventoService eventoService) {
         this.utenteService = utenteService;
+        this.eventoService = eventoService;
     }
 
     /**
-     * Registrazione di un utente, acquirente o venditore.
+     * ==============================================================
+     * AUTENTICAZIONE (REGISTRAZIONE / LOGIN / LOGOUT)
+     * ==============================================================
      */
+
     @PostMapping("/registrazione")
-    public ResponseEntity<String> registrazione(@RequestBody RegistrazioneDTO dto) {
-        try {
-            String result = utenteService.registrazioneUtente(dto);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<UtenteDTO> richiestaRegistrazione(@Valid @RequestBody RegistrazioneDTO dto) {
+        return ResponseEntity.ok(utenteService.registrazioneUtente(dto));
     }
 
-    /**
-     * Login generico per utente (email, password).
-     */
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
-        try {
-            sessione = utenteService.login(dto.email(), dto.password());
-            return ResponseEntity.ok("Login effettuato per " + sessione.getUtente().getRuolo() + " con ID: " + sessione.getUtente().getId());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<String> login(@Valid @RequestBody LoginDTO dto, HttpSession httpSession) {
+        Sessione s = utenteService.login(dto.email(), dto.password());
+        httpSession.setAttribute(GestionaleService.SESSIONE_KEY, s);
+        return ResponseEntity.ok("Login effettuato con successo");
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Logout effettuato con successo");
+    }
+
+
+
     /**
-     * Visualizza info utente.
+     * ==============================================================
+     * LETTURA / GESTIONE UTENTI
+     * ==============================================================
      */
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> RichiestaVisualizzaUtente(@PathVariable int id) {
+    public ResponseEntity<?> richiestaVisualizzaUtente(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(utenteService.visualizzaUtente(id));
     }
 
-    /**
-     * Restituisce prodotti posseduti da un venditore.
-     */
-    @GetMapping("/{id}/prodotti")
-    public ResponseEntity<List<Prodotto>> RichiestaProdottiUtente(@PathVariable int id) {
-        return ResponseEntity.ok(utenteService.prodottiPosseduti(id));
+    @GetMapping()
+    public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaTuttiUtenti() {
+        return ResponseEntity.ok(utenteService.visualizzaTuttiUtenti());
     }
 
+    // Lista di venditori
+    @GetMapping("/venditori")
+    public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaVenditori() {
+        return ResponseEntity.ok(utenteService.visualizzaVenditori());
+    }
+
+
+    /**
+     * ==============================================================
+     * PRODOTTI & ORDINI DELL'UTENTE
+     * ==============================================================
+     */
+
+    // Lista di prodotti posseduti da un utente
+    @GetMapping("/{id}/prodotti")
+    public ResponseEntity<List<Prodotto>> richiestaVisualizzaProdottiUtente(@PathVariable @Positive Long id) {
+        return ResponseEntity.ok(utenteService.prodottiPosseduti(id));
+    }
 
     /**
      * Restituisce gli ordini dell'utente in sessione.
@@ -83,16 +108,42 @@ public class UtenteController {
         return ResponseEntity.ok(ordini);
     }
 
-	@GetMapping("/notifiche/visualizza")
-	public ResponseEntity<List<String>> RichiestaVisualizzaNotifiche(){
-		List<String> notifiche = utenteService.visualizzaNotifiche(this.sessione.getUtente());
-		return ResponseEntity.ok(notifiche);
-	}
 
-	@DeleteMapping("/notifiche/svuota")
-	public ResponseEntity<String> richiestaSvuotaNotifiche(){
-		return ResponseEntity.ok(utenteService.svuotaNotifiche(this.sessione.getUtente()));
-	}
+    /**
+     * ==============================================================
+     * NOTIFICHE UTENTE
+     * ==============================================================
+     */
+    @GetMapping("/notifiche/visualizza")
+    public ResponseEntity<List<String>> richiestaVisualizzaNotifiche() {
+        List<String> notifiche = utenteService.visualizzaNotifiche(this.sessione.getUtente());
+        return ResponseEntity.ok(notifiche);
+    }
+
+    @DeleteMapping("/notifiche/svuota")
+    public ResponseEntity<String> richiestaSvuotaNotifiche() {
+        return ResponseEntity.ok(utenteService.svuotaNotifiche(this.sessione.getUtente()));
+    }
+
+
+    /**
+     * ==============================================================
+     * EVENTI: ISCRIZIONI DELL'UTENTE
+     * ==============================================================
+     */
+
+    @GetMapping("/eventi/mie-iscrizioni")
+    public ResponseEntity<List<?>> richiestaEventiMieiIscritti(HttpSession session) {
+        UtenteVerificato u = getUtenteCorrente(session);
+        return ResponseEntity.ok(eventoService.visualizzaMieiEventiIscritto(u));
+    }
+
+
+    /**
+     * ==============================================================
+     * METODI TESTING
+     * ==============================================================
+     */
 
     @PostMapping("/login-test")
     public ResponseEntity<String> loginFittizio(HttpSession session) {
@@ -112,7 +163,6 @@ public class UtenteController {
         utenteService.loginVenditoreFittizio(session);
         return ResponseEntity.ok("Login venditore fittizio completato");
     }
-
 
     // per testare chi è l'utente in sessione
     @GetMapping("/whoami")
@@ -139,18 +189,29 @@ public class UtenteController {
         return ResponseEntity.ok(dto);
     }
 
-	// Lista di venditori
-	@GetMapping("/venditori")
-	public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaVenditori() {
-		return ResponseEntity.ok(utenteService.visualizzaVenditori());
-	}
+    @PostMapping("/impersona/{id}")
+    public ResponseEntity<Void> impersona(@PathVariable Long id, HttpSession session) {
+        var u = utenteService.visualizzaUtente(id);
+        Sessione s = (Sessione) session.getAttribute(GestionaleService.SESSIONE_KEY);
+        if (s == null) s = new Sessione();
+        s.setUtente(u);
+        session.setAttribute(GestionaleService.SESSIONE_KEY, s);
+        return ResponseEntity.noContent().build();
+    }
 
-	// Utility: estrae l'utente dalla HttpSession
-	private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
-		Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
-		if (s == null || s.getUtente() == null) {
-			throw new IllegalStateException("Utente non presente in sessione");
-		}
-		return s.getUtente();
-	}
+
+
+    /**
+     * ==============================================================
+     * UTILITY
+     * ==============================================================
+     */
+
+    private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
+        Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
+        if (s == null || s.getUtente() == null) {
+            throw new it.cs.unicam.ids.filiera.demo.exceptions.UnauthorizedException("Utente non autenticato");
+        }
+        return s.getUtente();
+    }
 }

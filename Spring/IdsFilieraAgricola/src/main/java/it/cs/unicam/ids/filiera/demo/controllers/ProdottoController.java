@@ -95,7 +95,7 @@ public class ProdottoController {
     }
 
     @GetMapping("/venditore/{id}")
-    public ResponseEntity<List<ProdottoDTO>> getProdottiPerVenditore(@PathVariable int id) {
+    public ResponseEntity<List<ProdottoDTO>> getProdottiPerVenditore(@PathVariable Long id) {
         return ResponseEntity.ok(
                 prodottoService.getProdotti(id).stream()
                         .map(ProdottoMapper::inDTO)

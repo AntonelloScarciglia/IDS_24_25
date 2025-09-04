@@ -7,18 +7,22 @@ import it.cs.unicam.ids.filiera.demo.services.AcquistoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/acquisto")
+@Validated
 public class AcquistoController {
+	private final AcquistoService serviceAcquisto;
 
-	@Autowired
-	private AcquistoService serviceAcquisto;
+    public AcquistoController(AcquistoService serviceAcquisto) {
+        this.serviceAcquisto = serviceAcquisto;
+    }
 
-	// Aggiungi al carrello
+    // Aggiungi al carrello
 	@PostMapping("/carrello/{id}")
 	public ResponseEntity<String> richiestaAggiungiAlCarrello(
 			@PathVariable Long id,

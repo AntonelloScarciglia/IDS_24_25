@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import it.cs.unicam.ids.filiera.demo.repositories.OrdineRepository;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,37 +43,45 @@ public class UtenteService {
         return "Acquirente registrato con ID: " + utente.getId();
     }
 
-    public String registrazioneUtente(RegistrazioneDTO dto) {
-        if ("VENDITORE".equalsIgnoreCase(dto.tipo())) {
-            if (dto.codiceFiscale() == null) {
-                throw new IllegalArgumentException("Codice fiscale richiesto per i venditori");
+    public UtenteDTO registrazioneUtente(RegistrazioneDTO dto) {
+        // Utente già registrato
+        if (utenteRepository.findByEmail(dto.email()).isPresent())
+            throw new IllegalArgumentException("Email già in uso");
+
+        // Utente non registrato
+        UtenteVerificato utenteDaRegistrare;
+        switch (dto.tipo().toUpperCase()) {
+            case "PRODUTTORE", "TRASFORMATORE", "DISTRIBUTORE", "ACQUIRENTE", "ANIMATORE" -> {
+                utenteDaRegistrare = FactoryUtente.createUser(Ruolo.valueOf(
+                        dto.tipo().toUpperCase()),
+                        dto.nome(),
+                        dto.cognome(),
+                        dto.email(),
+                        dto.password(),
+                        dto.codiceFiscale());
+                utenteRepository.save(utenteDaRegistrare);
             }
-            Venditore v = new Produttore(dto.nome(), dto.cognome(), dto.email(), dto.password(), dto.codiceFiscale());
-            utenteRepository.save(v);
-            return "Venditore registrato con ID: " + v.getId();
-        } else if ("ACQUIRENTE".equalsIgnoreCase(dto.tipo())) {
-            UtenteVerificato u = new Acquirente(dto.nome(), dto.cognome(), dto.email(), dto.password());
-            utenteRepository.save(u);
-            return "Acquirente registrato con ID: " + u.getId();
+            default -> throw new IllegalArgumentException("Tipo utente non valido");
         }
-        throw new IllegalArgumentException("Tipo utente non valido");
+        return UtenteMapper.toDto(utenteDaRegistrare);
     }
 
     public Sessione login(String email, String password) {
-        UtenteVerificato utente = utenteRepository.findByEmail(email);
-        if (utente == null || !utente.getPassword().equals(password)) {
-            throw new IllegalArgumentException("Credenziali non valide");
-        }
-        String ruolo = utente.getClass().getSimpleName();
+        UtenteVerificato utente = utenteRepository.findByEmail(email).orElseThrow(() ->
+                new IllegalArgumentException("Email non registrata."));
+
+        if (!utente.getPassword().equals(password))
+            throw new IllegalArgumentException("Password errata.");
+
         return new Sessione(utente);
     }
 
-    public UtenteVerificato visualizzaUtente(int id) {
-        return utenteRepository.findById((long) id)
+    public UtenteVerificato visualizzaUtente(Long id) {
+        return utenteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utente non trovato con ID: " + id));
     }
 
-    public List<Prodotto> prodottiPosseduti(int idVenditore) {
+    public List<Prodotto> prodottiPosseduti(Long idVenditore) {
         return prodottoService.getProdotti(idVenditore);
     }
 
@@ -132,26 +139,35 @@ public class UtenteService {
     }
 
     public List<String> visualizzaNotifiche(UtenteVerificato utenteCorrente) {
-		return utenteRepository.findById(utenteCorrente.getId()).get().getNotifiche().stream().toList();
-	}
+        return utenteRepository.findById(utenteCorrente.getId())
+                .get()
+                .getNotifiche()
+                .stream()
+                .toList();
+    }
 
-	public String svuotaNotifiche(UtenteVerificato utenteCorrente){
-		UtenteVerificato utente = utenteRepository.findById(utenteCorrente.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
+    public String svuotaNotifiche(UtenteVerificato utenteCorrente) {
+        UtenteVerificato utente = utenteRepository.findById(utenteCorrente.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
 
-		utente.getNotifiche().clear();
-		utenteRepository.save(utente);
-		return "Lista notifiche svuotata";
-	}
+        utente.getNotifiche().clear();
+        utenteRepository.save(utente);
+        return "Lista notifiche svuotata";
+    }
 
     public List<UtenteDTO> visualizzaVenditori() {
-
-
         return utenteRepository.findAllVenditori()
                 .stream()
                 .map(UtenteMapper::toDto)
                 .toList();
 
+    }
+
+    public List<UtenteDTO> visualizzaTuttiUtenti() {
+        return utenteRepository.findAll()
+                .stream()
+                .map(UtenteMapper::toDto)
+                .toList();
     }
 }
 

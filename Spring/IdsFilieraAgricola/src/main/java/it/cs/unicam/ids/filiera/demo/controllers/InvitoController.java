@@ -7,13 +7,18 @@ import it.cs.unicam.ids.filiera.demo.model.Sessione;
 import it.cs.unicam.ids.filiera.demo.services.GestionaleService;
 import it.cs.unicam.ids.filiera.demo.services.InvitoService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping // nessun base path, voglio che le rotte siano definite nel metodo per utilizzare /utenti o /eventi
+@Validated
 public class InvitoController {
 
     private final InvitoService invitoService;
@@ -25,7 +30,7 @@ public class InvitoController {
     private UtenteVerificato current(HttpSession httpSession) {
         Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
         if (s == null || s.getUtente() == null) {
-            throw new IllegalStateException("Utente non presente in sessione");
+            throw new it.cs.unicam.ids.filiera.demo.exceptions.UnauthorizedException("Utente non autenticato");
         }
         return s.getUtente();
     }
@@ -33,15 +38,15 @@ public class InvitoController {
     // Crea inviti per un evento (solo creatore)
     // POST /eventi/{eventoId}/inviti
     @PostMapping("/eventi/{eventoId}/inviti")
-    public ResponseEntity<List<InvitoDTO>> richiestaCreaInvito(@PathVariable("eventoId") Long eventoId,
-                                                               @RequestBody RichiestaInvitoDTO dto,
+    public ResponseEntity<List<InvitoDTO>> richiestaCreaInvito(@PathVariable("eventoId")  @Positive Long eventoId,
+                                                               @Valid @RequestBody RichiestaInvitoDTO dto,
                                                                HttpSession session) {
         UtenteVerificato u = current(session);
         return ResponseEntity.ok(invitoService.creaInvito(u, eventoId, dto));
     }
 
     @DeleteMapping("/eventi/invito/elimina/{invitoId}")
-    public ResponseEntity<String> richiestaEliminaInvito(@PathVariable Long invitoId, HttpSession session){
+    public ResponseEntity<String> richiestaEliminaInvito(@PathVariable @Positive Long invitoId, HttpSession session){
         UtenteVerificato u = this.current(session);
         return ResponseEntity.ok(invitoService.eliminaInvito(u, invitoId));
     }
@@ -49,7 +54,7 @@ public class InvitoController {
 
     /** Lista tutti inviti di un evento (solo creatore) */
     @GetMapping("/eventi/{eventoId}/inviti")
-    public ResponseEntity<List<InvitoDTO>> richiestaVisualizzaInvitiEvento(@PathVariable("eventoId") Long eventoId,
+    public ResponseEntity<List<InvitoDTO>> richiestaVisualizzaInvitiEvento(@PathVariable("eventoId") @Positive Long eventoId,
                                                                            HttpSession session) {
         UtenteVerificato u = current(session);
         return ResponseEntity.ok(invitoService.visualizzaTuttiInviti(u, eventoId));
@@ -66,8 +71,10 @@ public class InvitoController {
 
     /** RISPOSTA invito (ACCETTA|RIFIUTA) – solo invitato */
     @PostMapping("/inviti/{invitoId}/{azione}")
-    public ResponseEntity<InvitoDTO> richiestaRispondiInvito(@PathVariable Long invitoId,
-                                                             @PathVariable String azione,
+    public ResponseEntity<InvitoDTO> richiestaRispondiInvito(@PathVariable @Positive Long invitoId,
+                                                             @PathVariable
+                                                             @Pattern(regexp = "ACCETTA|RIFIUTA", flags = Pattern.Flag.CASE_INSENSITIVE)
+                                                             String azione,
                                                              HttpSession session) {
         UtenteVerificato u = current(session);
         return ResponseEntity.ok(invitoService.rispondiInvito(u, invitoId, azione));

@@ -8,6 +8,7 @@ import it.cs.unicam.ids.filiera.demo.entity.Venditore;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.InvitoStato;
+import it.cs.unicam.ids.filiera.demo.exceptions.ForbiddenException;
 import it.cs.unicam.ids.filiera.demo.observer.Observer;
 import it.cs.unicam.ids.filiera.demo.observer.ObserverManager;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
@@ -46,11 +47,6 @@ public class InvitoService {
         // impossibile invitare se l'evento è terminato
         ensureEventoNonTerminato(evento);
 
-        // 3) Validazione input
-        if (dto.idUtentiList() == null || dto.idUtentiList().isEmpty()) {
-            throw new IllegalArgumentException("La lista di utenti non può essere vuota");
-        }
-
         // 4) Per ogni id utente nella richiesta, controllo che sia Venditore, evito duplicati e salvo invito
         List<InvitoDTO> risultati = new ArrayList<>();
 
@@ -87,7 +83,7 @@ public class InvitoService {
         requireCreator(utente, invito.getEvento());
 
         invitoRepo.delete(invito);
-        observer.notificaInvitoRifiutato(invito);
+        observer.notificaInvitoEliminato(invito);
         return "Invito : " + invito.toString() + " eliminato";
     }
 
@@ -101,7 +97,7 @@ public class InvitoService {
 
         // autorizzazione: solo l'invitato può rispondere
         if (!Objects.equals(invito.getInvitato().getId(), utente.getId())) {
-            throw new IllegalStateException("Operazione consentita solo all'invitato");
+            throw new ForbiddenException("Operazione consentita solo all'invitato");
         }
 
         // stato: posso rispondere solo se l'invito è in attesa
@@ -126,8 +122,6 @@ public class InvitoService {
                 invito.setStato(InvitoStato.RIFIUTATO);
                 observer.notificaInvitoEliminato(invito);
             }
-
-            default -> throw new IllegalArgumentException("Azione non valida: " + azione);
         }
         return InvitoMapper.toDTO(invitoRepo.save(invito));
     }
@@ -163,14 +157,14 @@ public class InvitoService {
 
     private void requireCreator(UtenteVerificato utente, Evento evento) {
         if (evento.getCreatore() == null || !evento.getCreatore().getId().equals(utente.getId())) {
-            throw new IllegalStateException("Operazione consentita solo al creatore dell'evento");
+            throw new ForbiddenException("Operazione consentita solo al creatore dell'evento");
         }
     }
 
     private void ensureEventoNonTerminato(Evento e) {
         LocalDateTime now = LocalDateTime.now();
         if (e.getDataFine() != null && e.getDataFine().isBefore(now)) {
-            String when = e.getDataFine().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            String when = e.getDataFine().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
             throw new IllegalStateException("Evento terminato il " + when);
         }
     }

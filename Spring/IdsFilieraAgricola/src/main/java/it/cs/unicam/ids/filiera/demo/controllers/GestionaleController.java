@@ -5,12 +5,14 @@ import it.cs.unicam.ids.filiera.demo.model.Carrello;
 import it.cs.unicam.ids.filiera.demo.services.GestionaleService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
 @RestController
 @RequestMapping("/gestionale")
+@Validated
 public class GestionaleController {
 
 	private final GestionaleService gestionaleService;
@@ -54,12 +56,6 @@ public class GestionaleController {
 		Ordine ordine = gestionaleService.aggiungiOrdine(session);
 		return ResponseEntity.created(URI.create("/marketplace/ordini/" + ordine.getId()))
 				.body(ordine);
-	}
-
-
-	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-	public ResponseEntity<String> handleBadRequest(RuntimeException ex) {
-		return ResponseEntity.badRequest().body(ex.getMessage());
 	}
 
 

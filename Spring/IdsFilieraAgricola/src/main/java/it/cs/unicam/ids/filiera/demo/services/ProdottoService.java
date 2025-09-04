@@ -150,9 +150,9 @@ public class ProdottoService {
         return prodottoRepository.save(bundle);
     }
 
-    public List<Prodotto> getProdotti(int idVenditore) {
+    public List<Prodotto> getProdotti(Long idVenditore) {
         return prodottoRepository.findAll().stream()
-                .filter(p -> p.getVenditoreId() != null && p.getVenditoreId().equals((long) idVenditore))
+                .filter(p -> p.getVenditoreId() != null && p.getVenditoreId().equals(idVenditore))
                 .toList();
     }
 

@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UtenteRepository extends JpaRepository<UtenteVerificato, Long> {
 
-    UtenteVerificato findByEmail(String email);
+    Optional<UtenteVerificato> findByEmail(String email);
     @Query("""
     SELECT u
     FROM UtenteVerificato u
