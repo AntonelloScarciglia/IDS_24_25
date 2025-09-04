@@ -120,11 +120,11 @@ public class InvitoService {
                 var evento = invito.getEvento();
                 evento.aggiungiPartecipante(utente); // <- aggiorna anche i posti disponibili
                 invito.setStato(InvitoStato.ACCETTATO);
-                //observer.aggiornaUtentiInviti(evento.getCreatore().getId(), "Invito accettato : " + invito.toString());
+                observer.notificaInvitoAccettato(invito);
             }
             case "RIFIUTA" -> {
                 invito.setStato(InvitoStato.RIFIUTATO);
-                //observer.aggiornaUtentiInviti(invito.getEvento().getCreatore().getId(), "Invito rifiutato : " + invito.toString());
+                observer.notificaInvitoEliminato(invito);
             }
 
             default -> throw new IllegalArgumentException("Azione non valida: " + azione);

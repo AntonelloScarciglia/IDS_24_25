@@ -18,12 +18,10 @@ public abstract class Observer{
         this.utenteRepository = utenteRepository;
     }
 
-    public abstract void aggiorna(Prodotto prodotto, String messaggio);
+    public abstract void aggiorna(Notifica notifica, String messaggio);
 
     protected void addNotifica(UtenteVerificato utente, String messaggio){
         utente.getNotifiche().add(messaggio);
         utenteRepository.save(utente);
     }
-
-    public abstract void aggiornaInv(Invito invito, String messaggio);
 }

@@ -60,7 +60,7 @@ public class UtenteService {
         throw new IllegalArgumentException("Tipo utente non valido");
     }
 
-    public String login(String email, String password) {
+    public Sessione login(String email, String password) {
         UtenteVerificato utente = utenteRepository.findByEmail(email);
         if (utente == null || !utente.getPassword().equals(password)) {
             throw new IllegalArgumentException("Credenziali non valide");

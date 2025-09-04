@@ -17,18 +17,12 @@ public class CuratoreObserver extends Observer{
     }
 
     @Override
-    public void aggiorna(Prodotto prodotto, String messaggio){
-        List<UtenteVerificato> utenti = utenteRepository.findAll();
-        for(UtenteVerificato u : utenti){
-            if(u instanceof Curatore){
+    public void aggiorna(Notifica notifica, String messaggio) {
+        if(notifica instanceof Prodotto prodotto){
+            List<UtenteVerificato> utenti = utenteRepository.findAllCuratori();
+            for (UtenteVerificato u : utenti) {
                 addNotifica(u, "Nuovo prodotto da revisionare : " + prodotto.getNome());
             }
         }
     }
-
-    @Override
-    public void aggiornaInv(Invito invito, String messaggio) {
-        throw new UnsupportedOperationException("Metodo non supportato");
-    }
-
 }

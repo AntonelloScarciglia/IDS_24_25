@@ -13,6 +13,21 @@ public interface UtenteRepository extends JpaRepository<UtenteVerificato, Long> 
     SELECT u
     FROM UtenteVerificato u
     WHERE type(u) IN (Produttore, Trasformatore, Distributore)
-""")
+    """)
     List<UtenteVerificato> findAllVenditori();
+
+    @Query("""
+            SELECT u
+            FROM UtenteVerificato u
+            WHERE type(u) IN (Curatore)
+            """)
+    List<UtenteVerificato> findAllCuratori();
+
+    @Query("""
+            SELECT u
+            FROM UtenteVerificato u
+            WHERE type(u) IN (Animatore)
+            """)
+    List<UtenteVerificato> findAllAnimatore();
+
 }

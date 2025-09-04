@@ -17,17 +17,14 @@ public class AcquirenteObserver extends Observer {
     }
 
     @Override
-    public void aggiorna(Prodotto prodotto, String messaggio){
-        List<UtenteVerificato> utenti = utenteRepository.findAll();
-        for(UtenteVerificato u : utenti){
-            if(u instanceof Acquirente){
-                addNotifica(u, "Nuovo prodotto nel marketplace : " + prodotto.getNome());
+    public void aggiorna(Notifica notifica, String messaggio){
+        if(notifica instanceof Prodotto prodotto){
+            List<UtenteVerificato> utenti = utenteRepository.findAll();
+            for(UtenteVerificato u : utenti){
+                if(u instanceof Acquirente){
+                    addNotifica(u, "Nuovo prodotto nel marketplace : " + prodotto.getNome());
+                }
             }
         }
-    }
-
-    @Override
-    public void aggiornaInv(Invito invito, String messaggio) {
-        throw new UnsupportedOperationException("Metodo non supportato");
     }
 }

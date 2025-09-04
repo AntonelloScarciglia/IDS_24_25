@@ -1,6 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.entity.eventi;
 
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.observer.Notifica;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import java.util.Objects;
 @Getter
 @Entity
 @Setter
-public class Invito {
+public class Invito implements Notifica {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

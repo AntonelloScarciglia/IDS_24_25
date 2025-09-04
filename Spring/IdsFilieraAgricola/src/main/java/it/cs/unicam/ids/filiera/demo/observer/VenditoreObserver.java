@@ -17,24 +17,23 @@ public class VenditoreObserver extends Observer{
     }
 
     @Override
-    public void aggiorna(Prodotto prodotto, String messaggio){
-        List<UtenteVerificato> utenti = utenteRepository.findAll();
-        for(UtenteVerificato u : utenti){
-            if(u instanceof Venditore){
-                if(u.getId().equals(prodotto.getVenditoreId())){
-                    addNotifica(u, messaggio);
+    public void aggiorna(Notifica notifica, String messaggio){
+        if((notifica instanceof Prodotto prodotto)){
+            List<UtenteVerificato> utenti = utenteRepository.findAll();
+            for(UtenteVerificato u : utenti){
+                if(u instanceof Venditore){
+                    if(u.getId().equals(prodotto.getVenditoreId())){
+                        addNotifica(u, messaggio);
+                    }
                 }
             }
-        }
-    }
-
-    @Override
-    public void aggiornaInv(Invito invito, String messaggio){
-        List<UtenteVerificato> utenti = utenteRepository.findAll();
-        for(UtenteVerificato u : utenti){
-            if(u instanceof Venditore){
-                if(u.getId().equals(invito.getInvitato().getId())){
-                    addNotifica(u, messaggio);
+        }else if(notifica instanceof Invito invito){
+            List<UtenteVerificato> utenti = utenteRepository.findAll();
+            for(UtenteVerificato u : utenti){
+                if(u instanceof Venditore){
+                    if(u.getId().equals(invito.getInvitato().getId())){
+                        addNotifica(u, messaggio);
+                    }
                 }
             }
         }

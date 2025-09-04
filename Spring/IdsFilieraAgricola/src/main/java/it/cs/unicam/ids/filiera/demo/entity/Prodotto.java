@@ -1,5 +1,6 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
+import it.cs.unicam.ids.filiera.demo.observer.Notifica;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("BASE")
-public class Prodotto {
+public class Prodotto implements Notifica {
 
 
 	@Id
