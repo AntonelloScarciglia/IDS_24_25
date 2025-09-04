@@ -66,7 +66,7 @@ public class UtenteService {
             throw new IllegalArgumentException("Credenziali non valide");
         }
         String ruolo = utente.getClass().getSimpleName();
-        return "Login effettuato per " + ruolo + " con ID: " + utente.getId();
+        return new Sessione(utente);
     }
 
     public UtenteVerificato visualizzaUtente(int id) {
