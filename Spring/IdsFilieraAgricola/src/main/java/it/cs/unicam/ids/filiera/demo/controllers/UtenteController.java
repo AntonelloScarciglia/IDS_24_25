@@ -50,8 +50,8 @@ public class UtenteController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
         try {
-            String result = utenteService.login(dto.email(), dto.password());
-            return ResponseEntity.ok(result);
+            sessione = utenteService.login(dto.email(), dto.password());
+            return ResponseEntity.ok("Login effettuato per " + sessione.getUtente().getRuolo() + " con ID: " + sessione.getUtente().getId());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
