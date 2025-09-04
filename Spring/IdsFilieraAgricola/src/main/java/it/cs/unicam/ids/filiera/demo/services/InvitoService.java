@@ -87,7 +87,7 @@ public class InvitoService {
         requireCreator(utente, invito.getEvento());
 
         invitoRepo.delete(invito);
-        observer.notificaInvitoEliminato(invito);
+        observer.notificaInvitoRifiutato(invito);
         return "Invito : " + invito.toString() + " eliminato";
     }
 
