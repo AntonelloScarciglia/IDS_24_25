@@ -44,6 +44,16 @@ public class BundleItem {
         return quantita;
     }
 
+    public void setQuantita(int quantita) {
+        this.quantita = quantita;
+    }
+
+    public void decrementaQuantita() {
+        if (this.quantita > 0) {
+            this.quantita--;
+        }
+    }
+
     public void incrementaQuantita() {
         this.quantita++;
     }

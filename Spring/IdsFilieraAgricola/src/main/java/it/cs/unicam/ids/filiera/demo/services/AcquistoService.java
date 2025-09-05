@@ -2,9 +2,12 @@ package it.cs.unicam.ids.filiera.demo.services;
 
 
 import it.cs.unicam.ids.filiera.demo.model.Carrello;
+import it.cs.unicam.ids.filiera.demo.model.RigaCarrello;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Iterator;
 
 @Service
 public class AcquistoService {
@@ -18,8 +21,26 @@ public class AcquistoService {
 	}
 
 	public String rimuoviDalCarrello(HttpSession session, Long prodottoId) {
-		gestionaleService.getCarrello(session).rimuovi(prodottoId);
-		return "Prodotto rimosso dal carrello";
+		Carrello carrello = getCarrello(session);
+
+		Iterator<RigaCarrello> iterator = carrello.getRighe().iterator();
+		while (iterator.hasNext()) {
+			RigaCarrello riga = iterator.next();
+
+			if (riga.getProdottoId().equals(prodottoId)) {
+				Long q = riga.getQuantita();
+
+				if (q > 1) {
+					riga.setQuantita(q - 1);
+				} else {
+					iterator.remove(); // ✅ più sicuro di remove() sulla lista
+				}
+
+				return "Quantità aggiornata/ridotta nel carrello.";
+			}
+		}
+
+		return "Prodotto non trovato nel carrello.";
 	}
 
 	public String svuotaCarrello(HttpSession session) {

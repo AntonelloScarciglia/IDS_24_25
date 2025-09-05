@@ -108,35 +108,49 @@ public class ProdottoService {
         Prodotto prodotto = prodottoRepository.findById(prodottoId)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
 
-
         if (prodotto instanceof Bundle) {
             throw new IllegalArgumentException("Non è possibile inserire un bundle dentro un altro bundle.");
         }
 
-        // Verifica se già esiste e aggiorna quantità
         Optional<BundleItem> esistente = bundle.getItems().stream()
                 .filter(item -> item.getProdotto().getId().equals(prodottoId))
                 .findFirst();
 
         if (esistente.isPresent()) {
-            esistente.get().incrementaQuantita(); // metodo da definire in BundleItem
+            esistente.get().incrementaQuantita();
         } else {
             bundle.aggiungiItem(prodotto, 1);
         }
 
         aggiornaPrezzoBundle(bundle);
+
         return prodottoRepository.save(bundle);
     }
+
 
 
     @Transactional
     public Prodotto rimuoviProdottoDaBundle(Long bundleId, Long prodottoId) {
         Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
-        if (!bundle.isAttesa()) throw new IllegalStateException("Bundle confermato: non modificabile.");
 
-        bundle.getItems().removeIf(item -> item.getProdotto().getId().equals(prodottoId));
+        if (!bundle.isAttesa()) {
+            throw new IllegalStateException("Bundle confermato: non modificabile.");
+        }
+
+        BundleItem item = bundle.getItems().stream()
+                .filter(i -> i.getProdotto().getId().equals(prodottoId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non presente nel bundle"));
+
+        if (item.getQuantita() > 1) {
+            item.setQuantita(item.getQuantita() - 1);
+        } else {
+            bundle.getItems().remove(item);
+        }
+
         aggiornaPrezzoBundle(bundle);
+
         return prodottoRepository.save(bundle);
     }
 
