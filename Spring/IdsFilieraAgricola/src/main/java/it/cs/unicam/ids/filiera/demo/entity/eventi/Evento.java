@@ -104,7 +104,7 @@ public class Evento implements Notifica {
 
     public void setPostiDisponibili(int nuovi) {
         if (nuovi <= 0) {
-            this.capienzaMax = 0;
+            this.capienzaMax = -1;
             return; // illimitato
         }
         if (nuovi < partecipanti.size()) {
