@@ -9,14 +9,11 @@ import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.InvitoStato;
 import it.cs.unicam.ids.filiera.demo.exceptions.ForbiddenException;
-import it.cs.unicam.ids.filiera.demo.observer.Observer;
-import it.cs.unicam.ids.filiera.demo.observer.ObserverManager;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.InvitoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,8 +30,7 @@ public class InvitoService {
     private final InvitoRepository invitoRepo;
     private final EventoRepository eventoRepo;
     private final UtenteRepository utenteRepo;
-    @Autowired
-    private ObserverManager observer;
+
 
     public List<InvitoDTO> creaInvito(UtenteVerificato utente, Long eventoId, RichiestaInvitoDTO dto) {
         // 1) Carico l'evento dal DB o lancio eccezione se non esiste
@@ -69,7 +65,6 @@ public class InvitoService {
             // 4. Creo e salvo il nuovo invito (in attesa by default)
             Invito inv = new Invito(evento, invitato, dto.messaggio());
             inv = invitoRepo.save(inv);
-            observer.notificaInvitoCreato(inv);
             risultati.add(InvitoMapper.toDTO(inv));
         }
         return risultati;
@@ -83,7 +78,6 @@ public class InvitoService {
         requireCreator(utente, invito.getEvento());
 
         invitoRepo.delete(invito);
-        observer.notificaInvitoEliminato(invito);
         return "Invito : " + invito.toString() + " eliminato";
     }
 
@@ -114,13 +108,11 @@ public class InvitoService {
         switch (azione) {
             case "ACCETTA" -> {
                 var evento = invito.getEvento();
-                evento.aggiungiPartecipante(utente); // <- aggiorna anche i posti disponibili
+                evento.aggiungiPartecipanteInvito(utente); // <- aggiorna anche i posti disponibili
                 invito.setStato(InvitoStato.ACCETTATO);
-                observer.notificaInvitoAccettato(invito);
             }
             case "RIFIUTA" -> {
                 invito.setStato(InvitoStato.RIFIUTATO);
-                observer.notificaInvitoEliminato(invito);
             }
         }
         return InvitoMapper.toDTO(invitoRepo.save(invito));

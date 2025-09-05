@@ -1,9 +1,12 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
 import it.cs.unicam.ids.filiera.demo.observer.Notifica;
+import it.cs.unicam.ids.filiera.demo.observer.Observer;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -33,8 +36,11 @@ public class Prodotto implements Notifica {
 	@Column(name = "data_scadenza")
 	private LocalDate dataScadenza;
 
-	@Column(name = "attesa") // 👉 aggiunto
+	@Column(name = "attesa")
 	private boolean attesa = true; // default: in attesa
+
+	@Transient
+	private List<Observer> observers = new ArrayList<>();
 
 	// Costruttore JPA
 	public Prodotto() {
@@ -48,7 +54,7 @@ public class Prodotto implements Notifica {
 		this.prezzo = prezzo;
 		this.dataScadenza = dataScadenza;
 		this.attesa = true;
-		this.confermato = false; // 👈 AGGIUNGI QUESTO
+		this.confermato = false;
 	}
 
 
@@ -91,6 +97,21 @@ public class Prodotto implements Notifica {
 	@Override
 	public int hashCode() {
 		return Objects.hash(getClass(), id);
+	}
+
+	@Override
+	public void sub(Observer o) {
+
+	}
+
+	@Override
+	public void unsub(Observer o) {
+
+	}
+
+	@Override
+	public void notifyObservers(String message) {
+
 	}
 }
 

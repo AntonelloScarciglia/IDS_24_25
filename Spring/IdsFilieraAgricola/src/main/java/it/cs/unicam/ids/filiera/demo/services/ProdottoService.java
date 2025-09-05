@@ -5,10 +5,7 @@ import it.cs.unicam.ids.filiera.demo.entity.Bundle;
 import it.cs.unicam.ids.filiera.demo.entity.BundleItem;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.ProdottoTrasformato;
-import it.cs.unicam.ids.filiera.demo.observer.Observer;
-import it.cs.unicam.ids.filiera.demo.observer.ObserverManager;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
-import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +20,6 @@ public class ProdottoService {
 
     @Autowired
     private ProdottoRepository prodottoRepository;
-    @Autowired
-    private ObserverManager observer;
 
     public String newProdotto(ProdottoDTO dtoProd) {
         if (dtoProd.venditoreId() == null) {
@@ -45,7 +40,6 @@ public class ProdottoService {
         Prodotto prodotto = ProdottoMapper.inEntity(dtoProd);
         prodotto.setAttesa(true);
         prodottoRepository.save(prodotto);
-        observer.notificaProdottoCaricato(prodotto);
         return "Prodotto creato con ID: " + prodotto.getId();
     }
 
@@ -56,7 +50,6 @@ public class ProdottoService {
     public Prodotto rimuoviProdotto(int id) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodottoRepository.delete(prodotto);
-        observer.notificaProdottoRifiutato(prodotto);
         return prodotto;
     }
 
@@ -73,7 +66,6 @@ public class ProdottoService {
         Prodotto prodotto = visualizzaProdotto(id);
         prodotto.setNome(nome);
         prodotto.setPrezzo(prezzo);
-        observer.notificaProdottoAggiornato(prodotto);
         return prodottoRepository.save(prodotto);
     }
 
@@ -100,7 +92,7 @@ public class ProdottoService {
                 dto.dataScadenza(), dto.prodottoBaseId(), dto.certificato(), dto.metodoTrasformazione()
         );
         pt.setAttesa(true);
-        observer.notificaProdottoCaricato(pt);
+
         return prodottoRepository.save(pt);
     }
 
@@ -116,7 +108,7 @@ public class ProdottoService {
         Prodotto prodotto = prodottoRepository.findById(prodottoId)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
 
-        // ✅ BLOCCO: non puoi inserire un bundle dentro un altro bundle
+
         if (prodotto instanceof Bundle) {
             throw new IllegalArgumentException("Non è possibile inserire un bundle dentro un altro bundle.");
         }
@@ -133,7 +125,6 @@ public class ProdottoService {
         }
 
         aggiornaPrezzoBundle(bundle);
-        observer.notificaProdottoAggiuntoBundle(bundle,prodotto);
         return prodottoRepository.save(bundle);
     }
 
@@ -146,7 +137,6 @@ public class ProdottoService {
 
         bundle.getItems().removeIf(item -> item.getProdotto().getId().equals(prodottoId));
         aggiornaPrezzoBundle(bundle);
-        observer.notificaProdottoRimossoBundle(bundle, prodottoRepository.findById(prodottoId).get());
         return prodottoRepository.save(bundle);
     }
 
@@ -177,7 +167,6 @@ public class ProdottoService {
         );
 
         nuovo.setAttesa(true); // Lo stato iniziale è "in attesa"
-        observer.notificaProdottoCaricato(nuovo);
         return prodottoRepository.save(nuovo);
     }
 
@@ -209,7 +198,6 @@ public class ProdottoService {
 
         bundle.setConfermato(true);
         bundle.setAttesa(false);
-        observer.notificaProdottoAccettato(bundle);
         return prodottoRepository.save(bundle);
     }
 
@@ -218,7 +206,6 @@ public class ProdottoService {
     public Prodotto setStato(int id, boolean attesa) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodotto.setAttesa(attesa);
-        observer.notificaProdottoAggiornato(prodotto);
         return prodottoRepository.save(prodotto);
     }
 
@@ -231,14 +218,12 @@ public class ProdottoService {
     public Prodotto approvaProdotto(int id) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodotto.setAttesa(false);
-        observer.notificaProdottoAccettato(prodotto);
         return prodottoRepository.save(prodotto);
     }
 
     public Prodotto rifiutaProdotto(int id) {
         Prodotto prodotto = visualizzaProdotto(id);
         prodottoRepository.delete(prodotto);
-        observer.notificaProdottoRifiutato(prodotto);
         return prodotto;
     }
 
@@ -272,10 +257,6 @@ public class ProdottoService {
         return prodottoRepository.findBundleWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato con ID: " + id));
     }
-
-
-
-
 
     public String toStringProdotto(Prodotto prod) {
         String base = "Prodotto{id=%d, tipo=%s, nome='%s', categoria='%s', prezzo=%.2f, scadenza=%s, attesa=%s}"

@@ -1,6 +1,9 @@
 package it.cs.unicam.ids.filiera.demo.entity.eventi;
 
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.observer.AnimatoreObserver;
+import it.cs.unicam.ids.filiera.demo.observer.Notifica;
+import it.cs.unicam.ids.filiera.demo.observer.Observer;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +17,7 @@ import java.util.List;
 @Entity
 
 @Table(name = "eventi")
-public class Evento {
+public class Evento implements Notifica {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +54,9 @@ public class Evento {
     )
     private List<UtenteVerificato> partecipanti = new ArrayList<>();
 
+    @Transient // non persistente
+    private List<Observer> observers = new ArrayList<>();
+
     // Costruttore richiesto da JPA
     public Evento() {
     }
@@ -61,26 +67,32 @@ public class Evento {
         return capienzaMax <= 0;
     }
 
+    @PostLoad
+    private void initObservers() {
+        this.observers = new ArrayList<>();
+        this.sub(new AnimatoreObserver());
+    }
 
-    // Utility per aggiungere un partecipante evitando duplicati e rispettando capienza massima
-    public void aggiungiPartecipante(UtenteVerificato u) {
-        if (u == null) throw new IllegalStateException("Utente nullo");
-        if (contienePartecipante(u)) {
-            return;
-        }
-        if (!isIllimitato() && partecipanti.size() >= capienzaMax) {
-            throw new IllegalStateException("Evento pieno, impossibile aggiungere partecipante");
-        }
-        partecipanti.add(u);
+    // Aggiunge partecipante tramite iscrizione per notificare il creatore
+    public void aggiungiPartecipanteIscrizione(UtenteVerificato u) {
+        this.aggiungiPartecipante(u);
+        // Notifica al creatore dell'evento
+        notifyObservers("Nuova iscrizione all'evento: " + this.titolo + " da parte di " + u.getNome() + " " + u.getCognome());
+        controllaSePienoENotifica();
+    }
+
+    // Aggiunge partecipante tramite Invito, la notifica avviene dall'Invito
+    public void aggiungiPartecipanteInvito(UtenteVerificato u) {
+        this.aggiungiPartecipante(u);
+        controllaSePienoENotifica();
     }
 
     public void rimuoviPartecipante(UtenteVerificato u) {
-        if (u == null) throw new IllegalStateException("Utente nullo");
         partecipanti.removeIf(p -> p.getId().equals(u.getId()));
     }
 
     public boolean contienePartecipante(UtenteVerificato u) {
-        return u != null && partecipanti.stream().anyMatch(p -> p.getId().equals(u.getId()));
+        return partecipanti.stream().anyMatch(p -> p.getId().equals(u.getId()));
     }
 
 
@@ -101,6 +113,41 @@ public class Evento {
             );
         }
         this.capienzaMax = nuovi;
+    }
+
+    private void aggiungiPartecipante(UtenteVerificato u) {
+        if (u == null)
+            throw new IllegalStateException("Utente nullo");
+        if (contienePartecipante(u)) {
+            return;
+        }
+        if (!isIllimitato() && partecipanti.size() >= capienzaMax) {
+            throw new IllegalStateException("Evento pieno, impossibile aggiungere partecipante");
+        }
+        partecipanti.add(u);
+    }
+
+    private void controllaSePienoENotifica() {
+        if (!isIllimitato() && partecipanti.size() >= capienzaMax) {
+            notifyObservers("L'evento " + this.titolo + " non ha più posti disponibili." );
+        }
+    }
+
+    @Override
+    public void sub(Observer o) {
+        observers.add(o);
+    }
+
+    @Override
+    public void unsub(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers(String message) {
+        for (Observer o : observers) {
+            o.aggiorna(this, message);
+        }
     }
 }
 

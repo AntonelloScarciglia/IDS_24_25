@@ -1,6 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
+import it.cs.unicam.ids.filiera.demo.observer.Observer;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

@@ -1,28 +1,23 @@
 package it.cs.unicam.ids.filiera.demo.observer;
 
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
-import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-@Component
-public class AnimatoreObserver extends Observer{
-
-    protected AnimatoreObserver(UtenteRepository utenteRepository) {
-        super(utenteRepository);
-    }
+public class AnimatoreObserver implements Observer{
 
     @Override
     public void aggiorna(Notifica notifica, String messaggio) {
-        if(notifica instanceof Invito invito){
-            List<UtenteVerificato> animatori = utenteRepository.findAllAnimatore();
-            for(UtenteVerificato u :  animatori){
-                if(u.getId().equals(invito.getEvento().getCreatore().getId())){
-                    this.addNotifica(u, messaggio);
-                }
-            }
+        UtenteVerificato animatore;
+
+        if (notifica instanceof Invito invito) {
+            animatore = invito.getEvento().getCreatore();
+            animatore.getNotifiche().add(messaggio);
         }
-    }
-}
+
+        if (notifica instanceof Evento evento) {
+            animatore = evento.getCreatore();
+            animatore.getNotifiche().add(messaggio);
+        }
+
+    }}

@@ -37,13 +37,7 @@ public class UtenteService {
         this.ordineRepository = ordineRepository;
     }
 
-    public String registrati(String nome, String cognome, String email, String password) {
-        Acquirente utente = new Acquirente(nome, cognome, email, password);
-        utenteRepository.save(utente);
-        return "Acquirente registrato con ID: " + utente.getId();
-    }
-
-    public UtenteDTO registrazioneUtente(RegistrazioneDTO dto) {
+    public UtenteDTO registraUtente(RegistrazioneDTO dto) {
         // Utente già registrato
         if (utenteRepository.findByEmail(dto.email()).isPresent())
             throw new IllegalArgumentException("Email già in uso");
@@ -137,23 +131,6 @@ public class UtenteService {
         return ordineRepository.findByAcquirenteId(utente.getId());
 
     }
-
-
-    public List<String> visualizzaAndEliminaNotifiche(UtenteVerificato utenteCorrente) {
-        UtenteVerificato utente = utenteRepository.findById(utenteCorrente.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
-
-        List<String> notificheDaRestituire = List.copyOf(utente.getNotifiche());
-
-        utente.getNotifiche().removeAll(notificheDaRestituire);
-
-        utenteRepository.save(utente);
-
-        return notificheDaRestituire;
-    }
-
-
-
 
     public List<String> visualizzaNotifiche(UtenteVerificato utenteCorrente) {
         return utenteRepository.findById(utenteCorrente.getId())

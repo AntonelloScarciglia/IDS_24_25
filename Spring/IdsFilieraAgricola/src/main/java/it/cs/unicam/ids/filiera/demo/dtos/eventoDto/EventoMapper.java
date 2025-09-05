@@ -21,11 +21,10 @@ public class EventoMapper {
 
         Long creatoreId = (e.getCreatore() != null) ? e.getCreatore().getId() : null;
 
-        // Calcolo dei posti rimanenti (se illimitato → null)
+        // posti rimanenti: null se illimitato
         Integer postiRimanenti = illimitato
                 ? null
                 : Math.max(0, e.getCapienzaMax() - partecipantiCount);
-
 
         return new EventoDTO(
                 e.getId(),
@@ -34,8 +33,7 @@ public class EventoMapper {
                 e.getLuogo(),
                 e.getDataInizio(),
                 e.getDataFine(),
-                illimitato,
-                capienzaMax,
+                capienzaMax,        // input-like echo; null se illimitato
                 postiRimanenti,
                 partecipantiCount,
                 creatoreId,
@@ -43,7 +41,6 @@ public class EventoMapper {
         );
     }
 
-    /** entity per create (creatore NON viene impostato qui: lo mette il service) */
     public static Evento toEntity(EventoDTO dto) {
         if (dto == null) return null;
         Evento e = new Evento();
@@ -61,13 +58,12 @@ public class EventoMapper {
         e.setDataInizio(dto.dataInizio());
         e.setDataFine(dto.dataFine());
 
-        if (dto.illimitato()) {
-            //0 => illimitato
+        Integer cap = dto.capienzaMax();
+        if (cap == null || cap <= 0) {
+            // 0 => illimitato
             e.setPostiDisponibili(0);
         } else {
-            Integer capienza = dto.capienzaMax();
-            e.setPostiDisponibili(capienza != null ? capienza : 0);
+            e.setPostiDisponibili(cap);
         }
     }
 }
-

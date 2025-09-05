@@ -113,7 +113,7 @@ public class EventoService {
             throw new IllegalStateException("Utente già iscritto all'evento");
         }
 
-        e.aggiungiPartecipante(user); // controlla capienza internamente
+        e.aggiungiPartecipanteIscrizione(user); // controlla capienza internamente
         e = eventoRepository.save(e);
         return EventoMapper.toDto(e);
     }

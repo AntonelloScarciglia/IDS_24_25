@@ -4,6 +4,7 @@ import it.cs.unicam.ids.filiera.demo.dtos.LoginDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.UtenteDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.WhoAmIDTO;
+import it.cs.unicam.ids.filiera.demo.dtos.eventoDto.EventoDTO;
 import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
@@ -29,7 +30,6 @@ public class UtenteController {
 
     private final UtenteService utenteService;
     private final EventoService eventoService;
-    private Sessione sessione;
 
 
     @Autowired
@@ -46,7 +46,7 @@ public class UtenteController {
 
     @PostMapping("/registrazione")
     public ResponseEntity<UtenteDTO> richiestaRegistrazione(@Valid @RequestBody RegistrazioneDTO dto) {
-        return ResponseEntity.ok(utenteService.registrazioneUtente(dto));
+        return ResponseEntity.ok(utenteService.registraUtente(dto));
     }
 
     @PostMapping("/login")
@@ -103,7 +103,7 @@ public class UtenteController {
      * Restituisce gli ordini dell'utente in sessione.
      */
     @GetMapping("/ordini")
-    public ResponseEntity<List<Ordine>> RichiestaGetOrdiniUtente(HttpSession session) {
+    public ResponseEntity<List<Ordine>> richiestaVisualizzaOrdini(HttpSession session) {
         List<Ordine> ordini = utenteService.ordiniUtente(session);
         return ResponseEntity.ok(ordini);
     }
@@ -114,18 +114,15 @@ public class UtenteController {
      * NOTIFICHE UTENTE
      * ==============================================================
      */
-
     @GetMapping("/notifiche/visualizza")
-    public ResponseEntity<List<String>> richiestaVisualizzaNotifiche(HttpSession session) {
-        UtenteVerificato u = getUtenteCorrente(session);
-        return ResponseEntity.ok(utenteService.visualizzaAndEliminaNotifiche(u));
+    public ResponseEntity<List<String>> richiestaVisualizzaNotifiche(HttpSession httpSession) {
+        List<String> notifiche = utenteService.visualizzaNotifiche(this.getUtenteCorrente(httpSession));
+        return ResponseEntity.ok(notifiche);
     }
 
-
     @DeleteMapping("/notifiche/svuota")
-    public ResponseEntity<String> richiestaSvuotaNotifiche(HttpSession session) {
-        UtenteVerificato u = getUtenteCorrente(session);
-        return ResponseEntity.ok(utenteService.svuotaNotifiche(u));
+    public ResponseEntity<String> richiestaSvuotaNotifiche(HttpSession httpSession) {
+        return ResponseEntity.ok(utenteService.svuotaNotifiche(this.getUtenteCorrente(httpSession)));
     }
 
 
@@ -135,8 +132,9 @@ public class UtenteController {
      * ==============================================================
      */
 
+    // Ritorna la lista di eventi a cui l'utente in sessione è iscritto
     @GetMapping("/eventi/mie-iscrizioni")
-    public ResponseEntity<List<?>> richiestaEventiMieiIscritti(HttpSession session) {
+    public ResponseEntity<List<EventoDTO>> richiestaEventiMieiIscritti(HttpSession session) {
         UtenteVerificato u = getUtenteCorrente(session);
         return ResponseEntity.ok(eventoService.visualizzaMieiEventiIscritto(u));
     }
@@ -191,7 +189,7 @@ public class UtenteController {
         );
         return ResponseEntity.ok(dto);
     }
-
+    // per testare l'impersonificazione di un utente (solo admin)
     @PostMapping("/impersona/{id}")
     public ResponseEntity<Void> impersona(@PathVariable Long id, HttpSession session) {
         var u = utenteService.visualizzaUtente(id);
