@@ -10,16 +10,26 @@ public class EventoMapper {
     public static EventoDTO toDto(Evento e) {
         if (e == null) return null;
 
-        boolean illimitato = e.getCapienzaMax() <= 0;
-        Integer capienzaMax = illimitato ? null : e.getCapienzaMax();
+        boolean illimitato = (e.getCapienzaMax() <= 0);
+
+        Integer capienzaMax = illimitato
+                ? null
+                : e.getCapienzaMax();
 
         List<UtenteVerificato> partecipanti = e.getPartecipanti();
-        int partecipantiCount = (partecipanti == null) ? 0 : partecipanti.size();
+        int partecipantiCount = (partecipanti == null)
+                ? 0
+                : partecipanti.size();
+
         List<Long> partecipantiIds = (partecipanti == null)
                 ? List.of()
-                : partecipanti.stream().map(UtenteVerificato::getId).toList();
+                : partecipanti.stream()
+                .map(UtenteVerificato::getId)
+                .toList();
 
-        Long creatoreId = (e.getCreatore() != null) ? e.getCreatore().getId() : null;
+        Long creatoreId = (e.getCreatore() != null)
+                ? e.getCreatore().getId()
+                : null;
 
         // posti rimanenti: null se illimitato
         Integer postiRimanenti = illimitato
@@ -33,7 +43,8 @@ public class EventoMapper {
                 e.getLuogo(),
                 e.getDataInizio(),
                 e.getDataFine(),
-                capienzaMax,        // input-like echo; null se illimitato
+                illimitato,
+                capienzaMax,       // null se illimitato
                 postiRimanenti,
                 partecipantiCount,
                 creatoreId,
@@ -58,12 +69,14 @@ public class EventoMapper {
         e.setDataInizio(dto.dataInizio());
         e.setDataFine(dto.dataFine());
 
-        Integer cap = dto.capienzaMax();
-        if (cap == null || cap <= 0) {
-            // 0 => illimitato
-            e.setPostiDisponibili(0);
+        if (dto.illimitato()) {
+            e.setCapienzaMax(-1);
         } else {
-            e.setPostiDisponibili(cap);
+            Integer x = dto.capienzaMax();
+            if (x == null || x <= 0) {
+                throw new IllegalArgumentException("Se l'evento ha posti limitati, capienza massima deve essere > 0");
+            }
+            e.setCapienzaMax(x);
         }
     }
 }
