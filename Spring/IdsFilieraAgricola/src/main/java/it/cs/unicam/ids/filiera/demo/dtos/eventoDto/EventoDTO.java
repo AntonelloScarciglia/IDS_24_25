@@ -27,6 +27,9 @@ public record EventoDTO(
         @Future
         LocalDateTime dataFine,
 
+        // Se true in input, allora capienzaMax non viene considerato
+        boolean illimitato,
+
         // input: se null o <=0 => illimitato; se >0 => capienza fissa
         Integer capienzaMax,
 
@@ -47,4 +50,18 @@ public record EventoDTO(
     public boolean isValidDateRange() {
         return dataInizio == null || dataFine == null || dataFine.isAfter(dataInizio);
     }
+
+
+    @JsonIgnore
+    @AssertTrue(message = "Se illimitato = true, capienzaMax deve essere null. Se illimitato = false, capienzaMax deve essere > 0.")
+    public boolean icCapienzaCoerente() {
+        if (illimitato)
+            // quando illimitato, l'input capienza non deve essere inviato
+            return capienzaMax == null;
+        else
+            // quando non illimitato, capienza deve essere > 0
+            return capienzaMax != null && capienzaMax > 0;
+    }
+
+
 }
