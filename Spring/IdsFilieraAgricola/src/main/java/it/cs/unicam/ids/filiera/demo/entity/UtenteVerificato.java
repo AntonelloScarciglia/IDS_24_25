@@ -33,6 +33,10 @@ public abstract class UtenteVerificato {
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
 
+    @Column(name = "verificato")
+    private boolean verificato;
+
+
     protected UtenteVerificato() {} // richiesto da JPA
 
     public UtenteVerificato(String nome, String cognome, String email, String password) {
@@ -40,6 +44,7 @@ public abstract class UtenteVerificato {
         this.cognome = cognome;
         this.email = email;
         this.password = password;
+        this.verificato = false;
     }
 
     public UtenteVerificato(String nome, String cognome, String email, String password, String codiceFiscale) {
@@ -47,6 +52,7 @@ public abstract class UtenteVerificato {
         this.cognome = cognome;
         this.email = email;
         this.password = password;
+        this.verificato = false;
     }
 
 
@@ -64,6 +70,12 @@ public abstract class UtenteVerificato {
     public Ruolo getRuolo() { return ruolo; }
     public List<String> getNotifiche(){
         return this.notifiche;
+    }
+    public boolean isVerificato() {
+        return verificato;
+    }
+    public void setVerificato(boolean verificato) {
+        this.verificato = verificato;
     }
 
 }
