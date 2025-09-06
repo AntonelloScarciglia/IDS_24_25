@@ -67,7 +67,11 @@ public class UtenteService {
 
         if (!utente.getPassword().equals(password))
             throw new IllegalArgumentException("Password errata.");
-
+        
+        if(!utente.isVerificato()){
+            throw new ForbiddenException("L'utente non è stato convalidato");
+        }
+        
         return new Sessione(utente);
     }
 
