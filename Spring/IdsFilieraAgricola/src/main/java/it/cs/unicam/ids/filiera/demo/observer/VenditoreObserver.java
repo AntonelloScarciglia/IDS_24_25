@@ -3,6 +3,8 @@ package it.cs.unicam.ids.filiera.demo.observer;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Invito;
+import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
+import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 
 public class VenditoreObserver implements Observer {
 
@@ -27,5 +29,6 @@ public class VenditoreObserver implements Observer {
         }
     }
 }
+
 
 
