@@ -24,6 +24,10 @@ public class Prodotto implements Notifica {
 	@Column(name = "venditore_id")
 	private Long venditoreId;
 
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "creatore_id", nullable = false)
+	private UtenteVerificato creatore;
+
 	private String nome;
 	private String categoria;
 
@@ -57,6 +61,15 @@ public class Prodotto implements Notifica {
 		this.attesa = true;
 		this.confermato = false;
 		this.quantita = 0;
+		this.notifyObservers("Il nuovo prodotto " + this.getNome() + "è stato creato in attesa di validazione");
+	}
+
+	@PostLoad
+	private void initObservers() {
+		this.observers = new ArrayList<>();
+		this.sub(new VenditoreObserver());
+		this.sub(new AcquirenteObserver());
+		this.sub(new CuratoreObserver());
 	}
 
 	// Getter / Setter
@@ -70,6 +83,14 @@ public class Prodotto implements Notifica {
 
 	public void setVenditoreId(Long venditoreId) {
 		this.venditoreId = venditoreId;
+	}
+
+	public UtenteVerificato getCreatore() {
+		return creatore;
+	}
+
+	public void setCreatore(UtenteVerificato creatore) {
+		this.creatore = creatore;
 	}
 
 	public String getNome() {
@@ -118,6 +139,8 @@ public class Prodotto implements Notifica {
 
 	public void setConfermato(boolean confermato) {
 		this.confermato = confermato;
+		this.confermato = confermato;
+		notifyObservers("Il prodotto " + this.getNome() + "è stato confermato");
 	}
 
 	public int getQuantita() {
@@ -143,14 +166,21 @@ public class Prodotto implements Notifica {
 
 	// Observer pattern (vuoto per ora)
 	@Override
-	public void sub(Observer o) {}
+	public void sub(Observer o) {
+		observers.add(o);
+	}
 
 	@Override
-	public void unsub(Observer o) {}
+	public void unsub(Observer o) {
+		observers.remove(o);
+	}
 
 	@Override
-	public void notifyObservers(String message) {}
-
+	public void notifyObservers(String message) {
+		for (Observer o : observers) {
+			o.aggiorna(this, message);
+		}
+	}
 	// Equals & hashCode
 	@Override
 	public boolean equals(Object o) {
