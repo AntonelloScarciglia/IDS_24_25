@@ -14,6 +14,7 @@ import it.cs.unicam.ids.filiera.demo.services.GestionaleService;
 import it.cs.unicam.ids.filiera.demo.services.UtenteService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -84,6 +85,16 @@ public class UtenteController {
     @GetMapping("/venditori")
     public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaVenditori() {
         return ResponseEntity.ok(utenteService.visualizzaVenditori());
+    }
+
+    @GetMapping("/non-approvati")
+    public ResponseEntity<List<UtenteDTO>> richiestaVisualizzaUtentiNonApprovati(){
+        return ResponseEntity.ok(utenteService.visualizzaUtentiNonApprovati());
+    }
+
+    @PostMapping("/{scelta}/{id}")
+    public ResponseEntity<UtenteDTO> richiestaApprovaUtente(@PathVariable Long id, @PathVariable @Pattern(regexp = "ACCETTA|RIFIUTA", flags = Pattern.Flag.CASE_INSENSITIVE) String scelta, HttpSession session){
+        return ResponseEntity.ok(utenteService.approvaUtente(id, scelta, this.getUtenteCorrente(session)));
     }
 
 
