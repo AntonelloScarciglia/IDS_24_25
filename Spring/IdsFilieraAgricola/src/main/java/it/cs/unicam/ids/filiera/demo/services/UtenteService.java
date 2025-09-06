@@ -182,8 +182,8 @@ public class UtenteService {
         }
 
         UtenteVerificato u = utenteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Utente non presente"));
-        String sc = scelta.toUpperCase();
-        switch(sc){
+        scelta = scelta.toUpperCase();
+        switch(scelta){
             case "ACCETTA":
                 u.setVerificato(true);
                 utenteRepository.save(u);
