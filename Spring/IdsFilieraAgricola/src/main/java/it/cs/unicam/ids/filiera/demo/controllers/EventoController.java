@@ -89,7 +89,7 @@ public class EventoController {
      */
 
     @PostMapping("/{id}/iscrivi")
-    public ResponseEntity<EventoDTO> richiestaIscrivitiEvento(@PathVariable @Positive Long id, HttpSession session) {
+    public ResponseEntity<EventoDTO> richiestaIscriviUtenteEvento(@PathVariable @Positive Long id, HttpSession session) {
         UtenteVerificato u = getUtenteCorrente(session);
         return ResponseEntity.ok(eventoService.iscriviUtenteEvento(u, id));
     }
@@ -97,7 +97,7 @@ public class EventoController {
     @PostMapping("/{id}/disiscrivi")
     public ResponseEntity<EventoDTO> richiestaAnnullaIscrizione(@PathVariable @Positive Long id, HttpSession session) {
         UtenteVerificato u = getUtenteCorrente(session);
-        return ResponseEntity.ok(eventoService.disiscriviUtenteEvento(u, id));
+        return ResponseEntity.ok(eventoService.annullaIscrizione(u, id));
     }
 
 

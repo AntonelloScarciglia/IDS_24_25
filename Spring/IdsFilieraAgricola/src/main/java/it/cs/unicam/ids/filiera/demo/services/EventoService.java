@@ -10,6 +10,7 @@ import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
 import it.cs.unicam.ids.filiera.demo.exceptions.ForbiddenException;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
+import it.cs.unicam.ids.filiera.demo.repositories.InvitoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,11 @@ import java.util.List;
 public class EventoService {
 
     private final EventoRepository eventoRepository;
+    private final InvitoRepository invitoRepository;
 
-    public EventoService(EventoRepository eventoRepository) {
+    public EventoService(EventoRepository eventoRepository, InvitoRepository invitoRepository) {
         this.eventoRepository = eventoRepository;
+        this.invitoRepository = invitoRepository;
     }
 
     /* =========================================
@@ -97,6 +100,8 @@ public class EventoService {
         Evento e = eventoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Evento con id " + id + " non trovato"));
         controllaCreatore(animatore, e);
+        e.cancella(); // <-- notifica partecipanti se data inizio futura
+        invitoRepository.deleteByEventoId(e.getId()); // elimina inviti collegati
         eventoRepository.delete(e);
         return true;
     }
@@ -119,7 +124,7 @@ public class EventoService {
     }
 
     /** Disiscrizione (solo ACQUIRENTE) */
-    public EventoDTO disiscriviUtenteEvento(UtenteVerificato user, Long eventoId) {
+    public EventoDTO annullaIscrizione(UtenteVerificato user, Long eventoId) {
         if (!(user instanceof Acquirente))
             throw new IllegalStateException("solo utenti Acquirenti possono disiscriversi da eventi");
 

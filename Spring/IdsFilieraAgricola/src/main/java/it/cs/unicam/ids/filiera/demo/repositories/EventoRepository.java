@@ -10,4 +10,6 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findByCreatoreId(Long id);
 
     List<Evento> findByPartecipantiId(Long id);
+
+
 }

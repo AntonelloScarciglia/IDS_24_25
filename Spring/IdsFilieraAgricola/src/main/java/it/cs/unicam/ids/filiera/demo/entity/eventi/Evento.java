@@ -1,9 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.entity.eventi;
 
 import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
-import it.cs.unicam.ids.filiera.demo.observer.AnimatoreObserver;
-import it.cs.unicam.ids.filiera.demo.observer.Notifica;
-import it.cs.unicam.ids.filiera.demo.observer.Observer;
+import it.cs.unicam.ids.filiera.demo.observer.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -70,6 +68,8 @@ public class Evento implements Notifica {
     @PostLoad
     private void initObservers() {
         this.observers = new ArrayList<>();
+        this.sub(new VenditoreObserver());
+        this.sub(new AcquirenteObserver());
         this.sub(new AnimatoreObserver());
     }
 
@@ -115,6 +115,13 @@ public class Evento implements Notifica {
         this.capienzaMax = nuovi;
     }
 
+    public void cancella() {
+        // notifica solo se data inizio futura
+        if (dataInizio.isAfter(LocalDateTime.now()))
+            notifyObservers("L'evento " + this.titolo + " è stato cancellato.");
+
+    }
+
     private void aggiungiPartecipante(UtenteVerificato u) {
         if (u == null)
             throw new IllegalStateException("Utente nullo");
@@ -129,7 +136,7 @@ public class Evento implements Notifica {
 
     private void controllaSePienoENotifica() {
         if (!isIllimitato() && partecipanti.size() >= capienzaMax) {
-            notifyObservers("L'evento " + this.titolo + " non ha più posti disponibili." );
+            notifyObservers("L'evento " + this.titolo + " non ha più posti disponibili.");
         }
     }
 
