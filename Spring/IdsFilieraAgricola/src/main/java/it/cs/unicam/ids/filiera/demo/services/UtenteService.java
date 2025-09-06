@@ -45,7 +45,7 @@ public class UtenteService {
         // Utente non registrato
         UtenteVerificato utenteDaRegistrare;
         switch (dto.tipo().toUpperCase()) {
-            case "PRODUTTORE", "TRASFORMATORE", "DISTRIBUTORE", "ACQUIRENTE", "ANIMATORE" -> {
+            case "PRODUTTORE", "TRASFORMATORE", "DISTRIBUTORE", "ACQUIRENTE", "ANIMATORE", "GESTORE" -> {
                 utenteDaRegistrare = FactoryUtente.createUser(Ruolo.valueOf(
                         dto.tipo().toUpperCase()),
                         dto.nome(),
@@ -162,6 +162,37 @@ public class UtenteService {
                 .stream()
                 .map(UtenteMapper::toDto)
                 .toList();
+    }
+
+    public List<UtenteDTO> visualizzaUtentiNonApprovati() {
+        return utenteRepository.findAll()
+                .stream()
+                .filter(u -> u.isVerificato() == false)
+                .map(UtenteMapper :: toDto)
+                .toList();
+    }
+
+    public UtenteDTO approvaUtente(Long id, String scelta, UtenteVerificato utente) {
+        if(utente.getRuolo() != Ruolo.GESTORE){
+            throw new ForbiddenException("L'utente non è autorizzato");
+        }
+
+        if(utente.isVerificato()){
+            throw new IllegalStateException("L'utente è gia stato validato");
+        }
+
+        UtenteVerificato u = utenteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Utente non presente"));
+        String sc = scelta.toUpperCase();
+        switch(sc){
+            case "ACCETTA":
+                u.setVerificato(true);
+                utenteRepository.save(u);
+                break;
+            case "RIFIUTA":
+                utenteRepository.delete(u);
+                break;
+        }
+        return UtenteMapper.toDto(u);
     }
 }
 
