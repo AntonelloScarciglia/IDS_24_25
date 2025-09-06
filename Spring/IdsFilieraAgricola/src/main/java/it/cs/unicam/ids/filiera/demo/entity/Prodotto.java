@@ -1,7 +1,6 @@
 package it.cs.unicam.ids.filiera.demo.entity;
 
-import it.cs.unicam.ids.filiera.demo.observer.Notifica;
-import it.cs.unicam.ids.filiera.demo.observer.Observer;
+import it.cs.unicam.ids.filiera.demo.observer.*;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -138,7 +137,6 @@ public class Prodotto implements Notifica {
 	}
 
 	public void setConfermato(boolean confermato) {
-		this.confermato = confermato;
 		this.confermato = confermato;
 		notifyObservers("Il prodotto " + this.getNome() + "è stato confermato");
 	}
