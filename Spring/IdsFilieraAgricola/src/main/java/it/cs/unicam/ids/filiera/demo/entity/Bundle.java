@@ -45,6 +45,8 @@ public class Bundle extends Prodotto {
 
 	public void setConfermato(boolean confermato) {
 		this.confermato = confermato;
+		notifyObservers("Il bundle " + this.getNome() + "è stato confermato");
+	}
 	}
 
 	public void setBundle(boolean bundle) {
