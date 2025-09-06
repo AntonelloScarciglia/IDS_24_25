@@ -5,6 +5,7 @@ import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.UtenteDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.UtenteMapper;
 import it.cs.unicam.ids.filiera.demo.entity.*;
+import it.cs.unicam.ids.filiera.demo.exceptions.ForbiddenException;
 import it.cs.unicam.ids.filiera.demo.factory.FactoryUtente;
 import it.cs.unicam.ids.filiera.demo.factory.Ruolo;
 import it.cs.unicam.ids.filiera.demo.model.Sessione;
