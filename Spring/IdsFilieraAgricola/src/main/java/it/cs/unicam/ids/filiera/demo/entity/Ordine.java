@@ -3,6 +3,8 @@ package it.cs.unicam.ids.filiera.demo.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "ordini")
@@ -16,6 +18,9 @@ public class Ordine {
 
 	private BigDecimal totale;
 	private LocalDateTime creatoIl = LocalDateTime.now();
+	@OneToMany(mappedBy = "ordine", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<RigaOrdine> righe = new ArrayList<>();
+
 
 	protected Ordine() {}
 
@@ -37,5 +42,18 @@ public class Ordine {
 						acquirente != null ? acquirente.getCognome() : "?",
 						totale, creatoIl);
 	}
+
+
+	public List<RigaOrdine> getRighe() {
+		return righe;
+	}
+
+
+	public void aggiungiRiga(Prodotto prodotto, int quantita) {
+		this.righe.add(new RigaOrdine(this, prodotto, quantita));
+	}
+
+
+
 }
 

@@ -76,8 +76,8 @@ public class ProdottoService {
     }
 
     public Prodotto newProdottoTrasformato(ProdottoTrasformatoDTO dto) {
-        if (dto.venditoreId() == null || dto.prodottoBaseId() == null) {
-            throw new IllegalArgumentException("Dati obbligatori mancanti.");
+        if (dto.venditoreId() == null || dto.prodottoBaseId() == null || dto.quantita() == null || dto.quantita() <= 0) {
+            throw new IllegalArgumentException("Dati obbligatori mancanti o quantità non valida.");
         }
 
         Prodotto base = prodottoRepository.findById(dto.prodottoBaseId())
@@ -87,14 +87,29 @@ public class ProdottoService {
             throw new IllegalArgumentException("Il prodotto base deve essere di tipo BASE.");
         }
 
+        if (base.getQuantita() < dto.quantita()) {
+            throw new IllegalStateException("Quantità insufficiente del prodotto base con ID: " + base.getId());
+        }
+
+        base.decrementaQuantita(dto.quantita());
+        prodottoRepository.save(base);
+
         ProdottoTrasformato pt = new ProdottoTrasformato(
-                dto.venditoreId(), dto.nome(), dto.categoria(), dto.prezzo(),
-                dto.dataScadenza(), dto.prodottoBaseId(), dto.certificato(), dto.metodoTrasformazione()
+                dto.venditoreId(),
+                dto.nome(),
+                dto.categoria(),
+                dto.prezzo(),
+                dto.dataScadenza(),
+                dto.prodottoBaseId(),
+                dto.certificato(),
+                dto.metodoTrasformazione()
         );
         pt.setAttesa(true);
+        pt.setQuantita(dto.quantita());
 
         return prodottoRepository.save(pt);
     }
+
 
     @Transactional
     public Prodotto aggiungiProdottoBundle(Long bundleId, Long prodottoId) {
@@ -193,7 +208,8 @@ public class ProdottoService {
     }
 
     @Transactional
-    public Prodotto confermaBundle(Long bundleId) {
+    public Prodotto confermaBundle(Long bundleId, int quantitaFinale) {
+
         Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
 
@@ -205,15 +221,38 @@ public class ProdottoService {
             throw new IllegalStateException("Impossibile confermare: il bundle è vuoto.");
         }
 
-        BigDecimal totale = bundle.getItems().stream()
-                .map(item -> item.getProdotto().getPrezzo().multiply(BigDecimal.valueOf(item.getQuantita())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        bundle.setPrezzo(totale);
+        // Verifica se c'è abbastanza scorta per ogni componente
+        for (BundleItem item : bundle.getItems()) {
+            Prodotto prodotto = item.getProdotto();
+            int richiestaTotale = item.getQuantita() * quantitaFinale;
 
+            if (prodotto.getQuantita() < richiestaTotale) {
+                throw new IllegalStateException("Quantità insufficiente per il prodotto '%s' (ID: %d). Richiesti: %d, Disponibili: %d"
+                        .formatted(prodotto.getNome(), prodotto.getId(), richiestaTotale, prodotto.getQuantita()));
+            }
+        }
+
+        // Scala le quantità ora che le verifiche sono ok
+        for (BundleItem item : bundle.getItems()) {
+            Prodotto prodotto = item.getProdotto();
+            int richiestaTotale = item.getQuantita() * quantitaFinale;
+            prodotto.decrementaQuantita(richiestaTotale);
+            prodottoRepository.save(prodotto);
+        }
+
+        // Imposta quantità finale del bundle
+        bundle.setQuantita(quantitaFinale);
+
+        // Ricalcola prezzo
+        aggiornaPrezzoBundle(bundle);
+
+        // Aggiorna stato
         bundle.setConfermato(true);
         bundle.setAttesa(false);
+
         return prodottoRepository.save(bundle);
     }
+
 
 
 

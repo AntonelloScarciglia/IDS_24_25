@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class GestionaleService {
@@ -74,6 +76,7 @@ public class GestionaleService {
 	}
 
 	/** Crea e persiste un ordine dal carrello; poi svuota il carrello */
+	@Transactional
 	public Ordine aggiungiOrdine(HttpSession httpSession) {
 		Sessione s = (Sessione) httpSession.getAttribute(SESSIONE_KEY);
 		if (s == null) throw new IllegalStateException("Sessione non inizializzata");
@@ -86,14 +89,38 @@ public class GestionaleService {
 		if (utente == null)
 			throw new IllegalStateException("Utente non presente in sessione");
 
+		// Crea l'ordine
 		Ordine ordine = new Ordine(utente, carrello.getTotale());
+
+		for (var riga : carrello.getRighe()) {
+			Prodotto p = prodottoRepository.findById(riga.getProdottoId())
+					.orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+
+			int richiesta = Math.toIntExact(riga.getQuantita());
+
+			// Verifica disponibilità
+			if (p.getQuantita() < richiesta) {
+				throw new IllegalStateException("Quantità insufficiente per il prodotto '%s'. Richiesti: %d, Disponibili: %d"
+						.formatted(p.getNome(), richiesta, p.getQuantita()));
+			}
+
+			// Scala la quantità
+			p.decrementaQuantita(richiesta);
+			prodottoRepository.save(p);
+
+			// Aggiungi riga all'ordine
+			ordine.aggiungiRiga(p, richiesta);
+		}
+
 		ordine = ordineRepository.save(ordine);
 
+		// Svuota il carrello
 		s.aggiornaCarrelloSvuota();
 		httpSession.setAttribute(SESSIONE_KEY, s);
 
 		return ordine;
 	}
+
 
 	/** Alias void per compatibilità col tuo design */
 	public void newOrdine(HttpSession httpSession) {
@@ -113,6 +140,16 @@ public class GestionaleService {
 		session.setAttribute(SESSIONE_KEY, s);
 	}
 
+	@Transactional(readOnly = true)
+	public List<Ordine> getOrdiniPerUtente(Long utenteId) {
+		return ordineRepository.findByAcquirenteId(utenteId);
+	}
+
+	@Transactional(readOnly = true)
+	public Ordine getOrdineSingolo(Long ordineId) {
+		return ordineRepository.findById(ordineId)
+				.orElseThrow(() -> new IllegalArgumentException("Ordine non trovato"));
+	}
 
 
 }

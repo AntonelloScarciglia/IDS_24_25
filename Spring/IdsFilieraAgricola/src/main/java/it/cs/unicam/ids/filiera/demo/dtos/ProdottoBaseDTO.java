@@ -8,5 +8,6 @@ public record ProdottoBaseDTO(
         String nome,
         String categoria,
         BigDecimal prezzo,
-        LocalDate dataScadenza
+        LocalDate dataScadenza,
+        Integer quantita
 ) {}

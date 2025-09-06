@@ -12,7 +12,7 @@ public record BundleDTO(
         String categoria,
         BigDecimal prezzo,
         LocalDate dataScadenza,
-        List<BundleItemDTO> componenti
-
+        List<BundleItemDTO> componenti,
+        Integer quantita
 ) {}
 

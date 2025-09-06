@@ -19,5 +19,6 @@ public record ProdottoDTO(
         String certificato,
         String metodoTrasformazione,
         // campi solo per BUNDLE:
-        List<Long> componenti     // IDs dei prodotti inclusi, senza quantità
+        List<Long> componenti,    // IDs dei prodotti inclusi, senza quantità
+        Integer quantita
 ) {}

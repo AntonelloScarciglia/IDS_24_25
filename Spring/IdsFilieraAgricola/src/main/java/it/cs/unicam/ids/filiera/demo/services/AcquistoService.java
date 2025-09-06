@@ -1,6 +1,7 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
 
+import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.model.Carrello;
 import it.cs.unicam.ids.filiera.demo.model.RigaCarrello;
 import jakarta.servlet.http.HttpSession;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class AcquistoService {
@@ -71,5 +73,12 @@ public class AcquistoService {
 		return gestionaleService.getCarrello(session);
 	}
 
+	public List<Ordine> visualizzaOrdini(Long utenteId) {
+		return gestionaleService.getOrdiniPerUtente(utenteId);
+	}
+
+	public Ordine visualizzaOrdineSingolo(Long ordineId) {
+		return gestionaleService.getOrdineSingolo(ordineId);
+	}
 
 }

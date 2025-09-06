@@ -139,11 +139,13 @@ public class ProdottoController {
         );
     }
 
-    @PutMapping("/bundle/{id}/conferma")
-    public ResponseEntity<ProdottoDTO> confermaBundle(@PathVariable Long id) {
-        return ResponseEntity.ok(
-                ProdottoMapper.inDTO(prodottoService.confermaBundle(id))
-        );
+    @PostMapping("/bundle/{id}/conferma")
+    public ResponseEntity<ProdottoDTO> confermaBundle(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int quantita
+    ) {
+        Prodotto prodotto = prodottoService.confermaBundle(id, quantita);
+        return ResponseEntity.ok(ProdottoMapper.inDTO(prodotto));
     }
 
 

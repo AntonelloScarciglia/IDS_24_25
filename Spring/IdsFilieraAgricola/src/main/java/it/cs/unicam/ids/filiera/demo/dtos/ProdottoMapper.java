@@ -47,7 +47,8 @@ public class ProdottoMapper {
                 prodottoBaseId,
                 certificato,
                 metodo,
-                componenti
+                componenti,
+                p.getQuantita()
         );
     }
 
@@ -56,7 +57,7 @@ public class ProdottoMapper {
 
         String tipo = dto.tipo() == null ? "BASE" : dto.tipo().toUpperCase();
 
-        return switch (tipo) {
+        Prodotto prodotto = switch (tipo) {
             case "TRASFORMATO" -> new ProdottoTrasformato(
                     dto.venditoreId(),
                     dto.nome(),
@@ -82,5 +83,12 @@ public class ProdottoMapper {
                     dto.dataScadenza()
             );
         };
+
+        if (dto.quantita() != null) {
+            prodotto.setQuantita(dto.quantita());
+        }
+
+        return prodotto;
     }
+
 }

@@ -12,5 +12,6 @@ public record ProdottoTrasformatoDTO(
         LocalDate dataScadenza,
         Long prodottoBaseId,
         String certificato,
-        String metodoTrasformazione
+        String metodoTrasformazione,
+        Integer quantita
 ) {}

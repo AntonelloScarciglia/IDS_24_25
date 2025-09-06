@@ -3,6 +3,7 @@ package it.cs.unicam.ids.filiera.demo.entity;
 import it.cs.unicam.ids.filiera.demo.observer.Notifica;
 import it.cs.unicam.ids.filiera.demo.observer.Observer;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import java.util.Objects;
 @DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("BASE")
 public class Prodotto implements Notifica {
-
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,21 +31,22 @@ public class Prodotto implements Notifica {
 	private BigDecimal prezzo;
 
 	@Column(nullable = false)
-	private boolean confermato = false; // default: non confermato
+	private boolean confermato = false;
 
 	@Column(name = "data_scadenza")
 	private LocalDate dataScadenza;
 
 	@Column(name = "attesa")
-	private boolean attesa = true; // default: in attesa
+	private boolean attesa = true;
+
+	@Column(nullable = false)
+	private int quantita = 0;
 
 	@Transient
 	private List<Observer> observers = new ArrayList<>();
 
 	// Costruttore JPA
-	public Prodotto() {
-
-	}
+	public Prodotto() {}
 
 	public Prodotto(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
 		this.venditoreId = venditoreId;
@@ -55,35 +56,60 @@ public class Prodotto implements Notifica {
 		this.dataScadenza = dataScadenza;
 		this.attesa = true;
 		this.confermato = false;
+		this.quantita = 0;
 	}
 
-
 	// Getter / Setter
-	public Long getId() { return id; }
+	public Long getId() {
+		return id;
+	}
 
-	public Long getVenditoreId() { return venditoreId; }
-	public void setVenditoreId(Long venditoreId) { this.venditoreId = venditoreId; }
+	public Long getVenditoreId() {
+		return venditoreId;
+	}
 
-	public String getNome() { return nome; }
-	public void setNome(String nome) { this.nome = nome; }
+	public void setVenditoreId(Long venditoreId) {
+		this.venditoreId = venditoreId;
+	}
 
-	public String getCategoria() { return categoria; }
-	public void setCategoria(String categoria) { this.categoria = categoria; }
+	public String getNome() {
+		return nome;
+	}
 
-	public BigDecimal getPrezzo() { return prezzo; }
-	public void setPrezzo(BigDecimal prezzo) { this.prezzo = prezzo; }
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
-	public LocalDate getDataScadenza() { return dataScadenza; }
-	public void setDataScadenza(LocalDate dataScadenza) { this.dataScadenza = dataScadenza; }
+	public String getCategoria() {
+		return categoria;
+	}
 
-	public boolean isAttesa() { return attesa; }
-	public void setAttesa(boolean attesa) { this.attesa = attesa; }
+	public void setCategoria(String categoria) {
+		this.categoria = categoria;
+	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Prodotto other)) return false;
-		return id != null && id.equals(other.id);
+	public BigDecimal getPrezzo() {
+		return prezzo;
+	}
+
+	public void setPrezzo(BigDecimal prezzo) {
+		this.prezzo = prezzo;
+	}
+
+	public LocalDate getDataScadenza() {
+		return dataScadenza;
+	}
+
+	public void setDataScadenza(LocalDate dataScadenza) {
+		this.dataScadenza = dataScadenza;
+	}
+
+	public boolean isAttesa() {
+		return attesa;
+	}
+
+	public void setAttesa(boolean attesa) {
+		this.attesa = attesa;
 	}
 
 	public boolean isConfermato() {
@@ -94,24 +120,50 @@ public class Prodotto implements Notifica {
 		this.confermato = confermato;
 	}
 
+	public int getQuantita() {
+		return quantita;
+	}
+
+	public void setQuantita(int quantita) {
+		this.quantita = quantita;
+	}
+
+	public void incrementaQuantita(int delta) {
+		if (delta < 0) throw new IllegalArgumentException("Delta negativo non valido.");
+		this.quantita += delta;
+	}
+
+	public void decrementaQuantita(int delta) {
+		if (delta < 0) throw new IllegalArgumentException("Delta negativo non valido.");
+		if (this.quantita < delta) {
+			throw new IllegalStateException("Quantità insufficiente per il prodotto con ID: " + this.id);
+		}
+		this.quantita -= delta;
+	}
+
+	// Observer pattern (vuoto per ora)
+	@Override
+	public void sub(Observer o) {}
+
+	@Override
+	public void unsub(Observer o) {}
+
+	@Override
+	public void notifyObservers(String message) {}
+
+	// Equals & hashCode
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Prodotto other)) return false;
+		return id != null && id.equals(other.id);
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(getClass(), id);
 	}
-
-	@Override
-	public void sub(Observer o) {
-
-	}
-
-	@Override
-	public void unsub(Observer o) {
-
-	}
-
-	@Override
-	public void notifyObservers(String message) {
-
-	}
 }
+
+
 

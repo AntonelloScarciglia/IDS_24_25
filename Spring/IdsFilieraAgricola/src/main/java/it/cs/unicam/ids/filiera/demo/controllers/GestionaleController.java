@@ -59,7 +59,6 @@ public class GestionaleController {
 	}
 
 
-
 	@GetMapping("/ping")
 	public String ping() {
 		return "OK - Gestionale attivo!";
