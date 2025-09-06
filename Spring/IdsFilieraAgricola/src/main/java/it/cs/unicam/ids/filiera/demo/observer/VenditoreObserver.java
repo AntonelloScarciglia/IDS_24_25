@@ -15,11 +15,17 @@ public class VenditoreObserver implements Observer {
 
         if (notifica instanceof Evento evento) {
             for (UtenteVerificato partecipante : evento.getPartecipanti()) {
-                if (partecipante.getRuolo().toString().equals("VENDITORE")) {
+                if (partecipante.getRuolo() == Ruolo.PRODUTTORE || partecipante.getRuolo() == Ruolo.DISTRIBUTORE || partecipante.getRuolo() == Ruolo.TRASFORMATORE) {
                     partecipante.getNotifiche().add(messaggio);
                 }
             }
         }
+
+        if(notifica instanceof Prodotto prodotto){
+            UtenteVerificato utente = prodotto.getCreatore();
+            utente.getNotifiche().add(messaggio);
+        }
     }
 }
+
 
