@@ -178,26 +178,27 @@ public class UtenteService {
     }
 
     public UtenteDTO approvaUtente(Long id, String scelta, UtenteVerificato utente) {
-        if(utente.getRuolo() != Ruolo.GESTORE){
-            throw new ForbiddenException("L'utente non è autorizzato");
+        if (utente.getRuolo() != Ruolo.GESTORE) {
+            throw new ForbiddenException("Solo il Gestore può effettuare questa richiesta.");
         }
 
-        if(utente.isVerificato()){
-            throw new IllegalStateException("L'utente è gia stato validato");
+        UtenteVerificato daApprovare = utenteRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Utente non presente."));
+
+        if (daApprovare.isVerificato()) {
+            throw new IllegalStateException("L'utente è gia stato approvato.");
         }
 
-        UtenteVerificato u = utenteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Utente non presente"));
         scelta = scelta.toUpperCase();
-        switch(scelta){
-            case "ACCETTA":
-                u.setVerificato(true);
-                utenteRepository.save(u);
-                break;
-            case "RIFIUTA":
-                utenteRepository.delete(u);
-                break;
+        switch (scelta) {
+            case "ACCETTA" -> {
+                daApprovare.setVerificato(true);
+                utenteRepository.save(daApprovare);
+            }
+            case "RIFIUTA" -> utenteRepository.delete(daApprovare);
         }
-        return UtenteMapper.toDto(u);
+        return UtenteMapper.toDto(daApprovare);
+        
     }
 }
 
