@@ -12,44 +12,48 @@ import java.util.List;
 @DiscriminatorValue("BUNDLE")
 public class Bundle extends Prodotto {
 
-	@OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<BundleItem> items = new ArrayList<>();
+    @OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BundleItem> items = new ArrayList<>();
 
-	private boolean isBundle;
+    private boolean isBundle;
 
-	@Column(nullable = false)
-	private boolean confermato = false;
+    @Column(nullable = false)
+    private boolean confermato = false;
 
 
-	protected Bundle() {}
+    protected Bundle() {
+    }
 
-	public Bundle(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
-		super(venditoreId, nome, categoria, prezzo, dataScadenza);
-	}
+    public Bundle(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
+        super(venditoreId, nome, categoria, prezzo, dataScadenza);
+    }
 
-	public void aggiungiItem(Prodotto prodotto, int quantita) {
-		this.items.add(new BundleItem(this, prodotto, quantita));
-	}
+    public void aggiungiItem(Prodotto prodotto, int quantita) {
+        this.items.add(new BundleItem(this, prodotto, quantita));
+    }
 
-	public List<BundleItem> getItems() {
-		return items;
-	}
+    public List<BundleItem> getItems() {
+        return items;
+    }
 
-	public boolean isBundle() {
-		return isBundle;
-	}
+    public boolean isBundle() {
+        return isBundle;
+    }
 
-	public boolean isConfermato() {
-		return confermato;
-	}
+    public boolean isConfermato() {
+        return confermato;
+    }
 
-	public void setConfermato(boolean confermato) {
-		this.confermato = confermato;
-		notifyObservers("Il bundle " + this.getNome() + "è stato confermato");
-	}
-	}
+    public void setConfermato(boolean confermato) {
+        this.confermato = confermato;
+        notifyObservers("Il bundle " + this.getNome() + "è stato confermato");
+    }
 
-	public void setBundle(boolean bundle) {
-		this.isBundle = bundle;
-	}
+    public void setBundle(boolean bundle) {
+        this.isBundle = bundle;
+    }
+
 }
+
+
+
