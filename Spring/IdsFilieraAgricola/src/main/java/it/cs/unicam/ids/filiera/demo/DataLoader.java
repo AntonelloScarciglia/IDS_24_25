@@ -1,9 +1,7 @@
 package it.cs.unicam.ids.filiera.demo;
 
 import it.cs.unicam.ids.filiera.demo.entity.*;
-
 import it.cs.unicam.ids.filiera.demo.entity.eventi.Evento;
-import it.cs.unicam.ids.filiera.demo.entity.utenti.*;
 import it.cs.unicam.ids.filiera.demo.repositories.EventoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
 import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
@@ -29,7 +27,7 @@ public class DataLoader {
     ) {
 
         return args -> {
-            // UTENTI
+            // utenti già verificati, pronti per login
             Gestore gestore = new Gestore("Giulia", "Bianchi", "gestore@example.com", "psw");
             gestore.setVerificato(true);
 
@@ -48,6 +46,7 @@ public class DataLoader {
             Acquirente acquirente = new Acquirente("Mario", "Rossi", "acquirente@example.com", "psw");
             acquirente.setVerificato(true);
 
+            // utenti da verificare per il gestore
             Acquirente acquirenteDaVerificare = new Acquirente("Alfredo", "Pedullà", "alfredo@example.com", "psw");
             Produttore produttoreDaVerificare = new Produttore("Matteo", "Moretto", "matteo@example.com", "psw", "PRDMRT80A01H501X");
 
@@ -95,7 +94,7 @@ public class DataLoader {
                     "Bevande",
                     new BigDecimal("3.90"),
                     LocalDate.now().plusMonths(2),
-                    mele.getId(), // riferimento al base
+                    mele.getId(),
                     "HACCP-1234",
                     "Pastorizzazione"
             );
@@ -106,12 +105,12 @@ public class DataLoader {
 
             prodottoRepo.save(succoMele);
 
-            // BUNDLE (Distributore) — contiene Latte + Succo
+            // BUNDLE (Distributore), contiene Latte + Succo
             Bundle boxColazione = new Bundle(
                     distributore.getId(),
                     "Box Colazione",
                     "Cestini",
-                    BigDecimal.ZERO, // sarà aggiornato sotto
+                    BigDecimal.ZERO,
                     LocalDate.now().plusMonths(1)
             );
             boxColazione.setCreatore(distributore);
@@ -120,7 +119,6 @@ public class DataLoader {
             boxColazione.aggiungiItem(latte, 2);
             boxColazione.aggiungiItem(succoMele, 1);
 
-            // aggiorno prezzo = somma(items.prezzo * qty)
             BigDecimal prezzoBundle = boxColazione.getItems().stream()
                     .map(i -> i.getProdotto().getPrezzo().multiply(BigDecimal.valueOf(i.getQuantita())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
