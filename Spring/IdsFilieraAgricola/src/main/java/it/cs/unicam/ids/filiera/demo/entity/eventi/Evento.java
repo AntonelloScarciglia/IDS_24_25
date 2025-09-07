@@ -101,7 +101,6 @@ public class Evento implements Notifica {
                 : Math.max(0, capienzaMax - partecipanti.size());
     }
 
-
     public void setPostiDisponibili(int nuovi) {
         if (nuovi <= 0) {
             this.capienzaMax = -1;
@@ -123,13 +122,20 @@ public class Evento implements Notifica {
     }
 
     private void aggiungiPartecipante(UtenteVerificato u) {
-        if (u == null)
+         if (u == null)
             throw new IllegalStateException("Utente nullo");
+
+        // non si può aggiungere partecipante già iscritto
         if (contienePartecipante(u)) {
             return;
         }
+        // non si può aggiungere partecipante se evento pieno
         if (!isIllimitato() && partecipanti.size() >= capienzaMax) {
             throw new IllegalStateException("Evento pieno, impossibile aggiungere partecipante");
+        }
+        // non si può aggiungere partecipante se evento già iniziato o concluso
+        if (dataFine.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Evento già concluso, impossibile aggiungere partecipante");
         }
         partecipanti.add(u);
     }
