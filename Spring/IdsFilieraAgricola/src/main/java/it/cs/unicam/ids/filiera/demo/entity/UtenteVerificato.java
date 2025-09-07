@@ -36,7 +36,6 @@ public abstract class UtenteVerificato {
     @Column(name = "verificato")
     private boolean verificato;
 
-
     protected UtenteVerificato() {} // richiesto da JPA
 
     public UtenteVerificato(String nome, String cognome, String email, String password) {
@@ -55,8 +54,6 @@ public abstract class UtenteVerificato {
         this.verificato = false;
     }
 
-
-
     // getter/setter
     public Long getId() { return id; }
     public String getNome() { return nome; }
@@ -68,14 +65,12 @@ public abstract class UtenteVerificato {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public Ruolo getRuolo() { return ruolo; }
-    public List<String> getNotifiche(){
-        return this.notifiche;
-    }
-    public boolean isVerificato() {
-        return verificato;
-    }
+    public List<String> getNotifiche(){ return this.notifiche; }
+    public boolean isVerificato() { return verificato; }
     public void setVerificato(boolean verificato) {
+        if (verificato) {
+            this.notifiche.add("Il tuo account è stato verificato in data: " + java.time.LocalDateTime.now());
+        }
         this.verificato = verificato;
     }
-
 }
