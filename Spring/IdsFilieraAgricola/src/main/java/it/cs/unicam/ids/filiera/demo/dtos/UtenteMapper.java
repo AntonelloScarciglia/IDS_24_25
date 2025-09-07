@@ -13,7 +13,9 @@ public class UtenteMapper {
                 u.getNome(),
                 u.getCognome(),
                 u.getEmail(),
-                ruoloStr
+                ruoloStr,
+                u.isVerificato() ? "APPROVATO" : "DA APPROVARE"
         );
     }
 }
+
