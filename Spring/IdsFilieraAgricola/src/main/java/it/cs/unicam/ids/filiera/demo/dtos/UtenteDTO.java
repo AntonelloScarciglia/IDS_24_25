@@ -5,5 +5,6 @@ public record UtenteDTO(
         String nome,
         String cognome,
         String email,
-        String ruolo
+        String ruolo,
+        String approvato
 ) {}
