@@ -40,9 +40,7 @@ public class UtenteController {
     }
 
     /**
-     * ==============================================================
      * AUTENTICAZIONE (REGISTRAZIONE / LOGIN / LOGOUT)
-     * ==============================================================
      */
 
     @PostMapping("/registrazione")
@@ -51,10 +49,10 @@ public class UtenteController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginDTO dto, HttpSession httpSession) {
+    public ResponseEntity<UtenteDTO> login(@Valid @RequestBody LoginDTO dto, HttpSession httpSession) {
         Sessione s = utenteService.login(dto.email(), dto.password());
         httpSession.setAttribute(GestionaleService.SESSIONE_KEY, s);
-        return ResponseEntity.ok("Login effettuato con successo");
+        return ResponseEntity.ok(UtenteMapper.toDto(s.getUtente()));
     }
 
     @PostMapping("/logout")
@@ -66,9 +64,7 @@ public class UtenteController {
 
 
     /**
-     * ==============================================================
      * LETTURA / GESTIONE UTENTI
-     * ==============================================================
      */
 
     @GetMapping("/{id}")
@@ -99,9 +95,7 @@ public class UtenteController {
 
 
     /**
-     * ==============================================================
      * PRODOTTI & ORDINI DELL'UTENTE
-     * ==============================================================
      */
 
     // Lista di prodotti posseduti da un utente
@@ -121,9 +115,7 @@ public class UtenteController {
 
 
     /**
-     * ==============================================================
      * NOTIFICHE UTENTE
-     * ==============================================================
      */
     @GetMapping("/notifiche/visualizza")
     public ResponseEntity<List<String>> richiestaVisualizzaNotifiche(HttpSession httpSession) {
@@ -138,9 +130,7 @@ public class UtenteController {
 
 
     /**
-     * ==============================================================
-     * EVENTI: ISCRIZIONI DELL'UTENTE
-     * ==============================================================
+     * EVENTI: ISCRIZIONI DELL'UTENTE 
      */
 
     // Ritorna la lista di eventi a cui l'utente in sessione è iscritto
@@ -152,11 +142,9 @@ public class UtenteController {
 
 
     /**
-     * ==============================================================
      * METODI TESTING
-     * ==============================================================
      */
-
+    
     @PostMapping("/login-test")
     public ResponseEntity<String> loginFittizio(HttpSession session) {
         utenteService.loginFittizio(session);
@@ -200,7 +188,7 @@ public class UtenteController {
         );
         return ResponseEntity.ok(dto);
     }
-    // per testare l'impersonificazione di un utente (solo admin)
+    // per testare l'impersonificazione di un utente
     @PostMapping("/impersona/{id}")
     public ResponseEntity<Void> impersona(@PathVariable Long id, HttpSession session) {
         var u = utenteService.visualizzaUtente(id);
@@ -216,7 +204,6 @@ public class UtenteController {
     /*
      * UTILITY
      */
-
     private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
         Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);
         if (s == null || s.getUtente() == null) {
