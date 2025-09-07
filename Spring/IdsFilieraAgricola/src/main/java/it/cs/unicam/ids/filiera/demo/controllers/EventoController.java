@@ -27,9 +27,7 @@ public class EventoController {
 
 
     /*
-       =========================================
        VISUALIZZAZIONE EVENTI
-       =========================================
      */
 
     @GetMapping()
@@ -56,9 +54,7 @@ public class EventoController {
 
 
     /*
-       =========================================
        CREAZIONE E GESTIONE EVENTI
-       =========================================
      */
 
     @PostMapping("/crea")
@@ -83,9 +79,7 @@ public class EventoController {
 
 
     /*
-       =========================================
        ISCRIZIONE AGLI EVENTI
-       =========================================
      */
 
     @PostMapping("/{id}/iscrivi")
@@ -101,10 +95,8 @@ public class EventoController {
     }
 
 
-    /**
-     * =====================================
+    /*
      * UTILITY
-     * =====================================
      */
     private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {
         Sessione s = (Sessione) httpSession.getAttribute(GestionaleService.SESSIONE_KEY);

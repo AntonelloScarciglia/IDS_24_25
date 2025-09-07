@@ -108,7 +108,7 @@ public class InvitoService {
         switch (azione) {
             case "ACCETTA" -> {
                 var evento = invito.getEvento();
-                evento.aggiungiPartecipanteInvito(utente); // <- aggiorna anche i posti disponibili
+                evento.aggiungiPartecipanteInvito(utente);
                 invito.setStato(InvitoStato.ACCETTATO);
             }
             case "RIFIUTA" -> {

@@ -28,9 +28,9 @@ public class EventoService {
         this.invitoRepository = invitoRepository;
     }
 
-    /* =========================================
+    /*
         METODI DI LETTURA
-       ========================================= */
+    */
     @Transactional(readOnly = true)
     public List<EventoDTO> visualizzaTuttiEventi() {
         return eventoRepository.findAll()
@@ -74,9 +74,9 @@ public class EventoService {
         return eventi.stream().map(EventoMapper::toDto).toList();
     }
 
-    /* =========================================
+    /*
         METODI DI SCRITTURA
-       ========================================= */
+    */
     public EventoDTO creaEvento(UtenteVerificato animatore, EventoDTO evento) {
         controllaAnimatore(animatore);
         Evento e = EventoMapper.toEntity(evento);
@@ -139,9 +139,9 @@ public class EventoService {
         return EventoMapper.toDto(e);
     }
 
-    /* =========================================
+    /*
         UTILITY (regole di dominio)
-       ========================================= */
+    */
     private void controllaAnimatore(UtenteVerificato user) {
         if (!(user instanceof Animatore)) {
             throw new ForbiddenException("Operazione consentita solo ad ANIMATORE");

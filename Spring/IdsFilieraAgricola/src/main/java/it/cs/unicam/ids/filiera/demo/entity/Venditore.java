@@ -11,7 +11,7 @@ public abstract class Venditore extends UtenteVerificato {
 	private String codiceFiscale;
 	private boolean attesa = true;
 
-	// Costruttore JPA
+
 	protected Venditore() {
 		super(); // richiesto da JPA
 	}

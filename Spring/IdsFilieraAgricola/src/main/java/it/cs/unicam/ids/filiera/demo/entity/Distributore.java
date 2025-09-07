@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 public class Distributore extends Venditore {
 
 	protected Distributore() {
-		// costruttore JPA
 	}
 	public Distributore(String nome, String cognome, String email, String password, String codiceficale) {
 		super(nome, cognome, email, password, codiceficale);

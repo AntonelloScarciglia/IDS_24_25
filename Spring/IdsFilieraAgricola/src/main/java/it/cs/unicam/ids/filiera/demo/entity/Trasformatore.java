@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 public class Trasformatore extends Venditore {
 
 	protected Trasformatore() {
-		// costruttore richiesto da JPA
 	}
 
 	public Trasformatore(String nome, String cognome, String email, String password, String codiceFiscale) {

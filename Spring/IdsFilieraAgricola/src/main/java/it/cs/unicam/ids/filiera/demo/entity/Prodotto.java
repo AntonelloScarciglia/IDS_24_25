@@ -48,7 +48,6 @@ public class Prodotto implements Notifica {
 	@Transient
 	private List<Observer> observers = new ArrayList<>();
 
-	// Costruttore JPA
 	public Prodotto() {}
 
 	public Prodotto(Long venditoreId, String nome, String categoria, BigDecimal prezzo, LocalDate dataScadenza) {
@@ -63,15 +62,8 @@ public class Prodotto implements Notifica {
 		this.notifyObservers("Il nuovo prodotto " + this.getNome() + "è stato creato in attesa di validazione");
 	}
 
-	@PostLoad
-	private void initObservers() {
-		this.observers = new ArrayList<>();
-		this.sub(new VenditoreObserver());
-		this.sub(new AcquirenteObserver());
-		this.sub(new CuratoreObserver());
-	}
 
-	// Getter / Setter
+
 	public Long getId() {
 		return id;
 	}
@@ -162,7 +154,7 @@ public class Prodotto implements Notifica {
 		this.quantita -= delta;
 	}
 
-	// Observer pattern (vuoto per ora)
+	// Observer pattern
 	@Override
 	public void sub(Observer o) {
 		observers.add(o);

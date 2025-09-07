@@ -213,10 +213,8 @@ public class UtenteController {
 
 
 
-    /**
-     * ==============================================================
+    /*
      * UTILITY
-     * ==============================================================
      */
 
     private UtenteVerificato getUtenteCorrente(HttpSession httpSession) {

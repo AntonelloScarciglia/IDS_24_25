@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 public class Produttore extends Venditore {
 
 	protected Produttore() {
-		// costruttore JPA
 	}
 
 	@Override

@@ -106,7 +106,7 @@ public class UtenteService {
 
         session.setAttribute("animatore", animatoreFinto);
 
-        Sessione s = gestionaleService.newSessione(session); // usa metodo pubblico
+        Sessione s = gestionaleService.newSessione(session); 
         s.setUtente(animatoreFinto);
         session.setAttribute(GestionaleService.SESSIONE_KEY, s);
     }

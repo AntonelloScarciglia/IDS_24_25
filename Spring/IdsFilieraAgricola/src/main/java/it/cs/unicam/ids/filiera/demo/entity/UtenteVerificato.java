@@ -36,7 +36,7 @@ public abstract class UtenteVerificato {
     @Column(name = "verificato")
     private boolean verificato;
 
-    protected UtenteVerificato() {} // richiesto da JPA
+    protected UtenteVerificato() {}
 
     public UtenteVerificato(String nome, String cognome, String email, String password) {
         this.nome = nome;
@@ -54,7 +54,7 @@ public abstract class UtenteVerificato {
         this.verificato = false;
     }
 
-    // getter/setter
+
     public Long getId() { return id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }

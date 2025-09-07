@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("CURATORE")
 public class Curatore extends UtenteVerificato{
 
-    //Costruttore richiesto da JPA
+
     protected Curatore() {}
 
     public Curatore(String nome, String cognome, String email, String password){

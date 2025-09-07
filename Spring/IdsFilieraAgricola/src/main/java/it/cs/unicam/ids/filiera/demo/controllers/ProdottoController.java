@@ -5,8 +5,12 @@ import it.cs.unicam.ids.filiera.demo.dtos.ProdottoDTO;
 import it.cs.unicam.ids.filiera.demo.dtos.ProdottoTrasformatoDTO;
 import it.cs.unicam.ids.filiera.demo.entity.Bundle;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
+import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.model.Sessione;
+import it.cs.unicam.ids.filiera.demo.services.GestionaleService;
 import it.cs.unicam.ids.filiera.demo.services.ProdottoService;
 import it.cs.unicam.ids.filiera.demo.dtos.ProdottoMapper;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -142,9 +146,19 @@ public class ProdottoController {
     @PostMapping("/bundle/{id}/conferma")
     public ResponseEntity<ProdottoDTO> confermaBundle(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "1") int quantita
+            @RequestParam(defaultValue = "1") int quantita,
+            HttpSession session
     ) {
-        Prodotto prodotto = prodottoService.confermaBundle(id, quantita);
+
+        Sessione s = (Sessione) session.getAttribute(GestionaleService.SESSIONE_KEY);
+        if (s == null || s.getUtente() == null)
+            throw new RuntimeException("Utente non autenticato");
+
+        UtenteVerificato utente = s.getUtente();
+
+
+        Prodotto prodotto = prodottoService.confermaBundle(id, quantita, utente);
+
         return ResponseEntity.ok(ProdottoMapper.inDTO(prodotto));
     }
 

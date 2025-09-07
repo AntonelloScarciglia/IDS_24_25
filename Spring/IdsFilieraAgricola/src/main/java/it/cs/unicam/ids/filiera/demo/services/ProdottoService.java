@@ -1,12 +1,14 @@
 package it.cs.unicam.ids.filiera.demo.services;
 
+
+import it.cs.unicam.ids.filiera.demo.entity.UtenteVerificato;
+import it.cs.unicam.ids.filiera.demo.repositories.UtenteRepository;
 import it.cs.unicam.ids.filiera.demo.dtos.*;
 import it.cs.unicam.ids.filiera.demo.entity.Bundle;
 import it.cs.unicam.ids.filiera.demo.entity.BundleItem;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
 import it.cs.unicam.ids.filiera.demo.entity.ProdottoTrasformato;
 import it.cs.unicam.ids.filiera.demo.repositories.ProdottoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +20,15 @@ import java.util.Optional;
 @Service
 public class ProdottoService {
 
-    @Autowired
-    private ProdottoRepository prodottoRepository;
+    private final ProdottoRepository prodottoRepository;
+    private final UtenteRepository utenteRepository;
+
+    public ProdottoService(ProdottoRepository prodottoRepository,
+                           UtenteRepository utenteRepository) {
+        this.prodottoRepository = prodottoRepository;
+        this.utenteRepository = utenteRepository;
+    }
+
 
     public String newProdotto(ProdottoDTO dtoProd) {
         if (dtoProd.venditoreId() == null) {
@@ -37,11 +46,17 @@ public class ProdottoService {
             throw new IllegalArgumentException("Per prodotti trasformati/bundle usa le rotte dedicate.");
         }
 
+        UtenteVerificato creatore = utenteRepository.findById(dtoProd.venditoreId())
+                .orElseThrow(() -> new IllegalArgumentException("Utente creatore non trovato con ID: " + dtoProd.venditoreId()));
+
         Prodotto prodotto = ProdottoMapper.inEntity(dtoProd);
         prodotto.setAttesa(true);
+        prodotto.setCreatore(creatore);
         prodottoRepository.save(prodotto);
+
         return "Prodotto creato con ID: " + prodotto.getId();
     }
+
 
     public Prodotto salvaProdotto(Prodotto prodotto) {
         return prodottoRepository.save(prodotto);
@@ -80,6 +95,11 @@ public class ProdottoService {
             throw new IllegalArgumentException("Dati obbligatori mancanti o quantità non valida.");
         }
 
+
+        UtenteVerificato creatore = utenteRepository.findById(dto.venditoreId())
+                .orElseThrow(() -> new IllegalArgumentException("Creatore non trovato con ID: " + dto.venditoreId()));
+
+
         Prodotto base = prodottoRepository.findById(dto.prodottoBaseId())
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto base non trovato."));
 
@@ -91,8 +111,10 @@ public class ProdottoService {
             throw new IllegalStateException("Quantità insufficiente del prodotto base con ID: " + base.getId());
         }
 
+
         base.decrementaQuantita(dto.quantita());
         prodottoRepository.save(base);
+
 
         ProdottoTrasformato pt = new ProdottoTrasformato(
                 dto.venditoreId(),
@@ -104,8 +126,10 @@ public class ProdottoService {
                 dto.certificato(),
                 dto.metodoTrasformazione()
         );
+
         pt.setAttesa(true);
         pt.setQuantita(dto.quantita());
+        pt.setCreatore(creatore);
 
         return prodottoRepository.save(pt);
     }
@@ -175,18 +199,23 @@ public class ProdottoService {
                 .toList();
     }
 
+
     public Prodotto newBundle(BundleDTO dto) {
         if (dto.venditoreId() == null) {
             throw new IllegalArgumentException("Il venditoreId è obbligatorio.");
         }
 
-        // Verifica se il venditore ha già un bundle in attesa
+
+        UtenteVerificato creatore = utenteRepository.findById(dto.venditoreId())
+                .orElseThrow(() -> new IllegalArgumentException("Creatore non trovato con ID: " + dto.venditoreId()));
+
+
         Optional<Bundle> esistente = prodottoRepository.findBundleInAttesaByVenditoreId(dto.venditoreId());
         if (esistente.isPresent()) {
             throw new IllegalStateException("Hai già un bundle in attesa. Confermalo prima di crearne un altro.");
         }
 
-        // Crea il nuovo bundle vuoto
+
         Bundle nuovo = new Bundle(
                 dto.venditoreId(),
                 dto.nome(),
@@ -195,9 +224,13 @@ public class ProdottoService {
                 dto.dataScadenza()
         );
 
-        nuovo.setAttesa(true); // Lo stato iniziale è "in attesa"
+        nuovo.setAttesa(true);
+        nuovo.setCreatore(creatore);
+
         return prodottoRepository.save(nuovo);
     }
+
+
 
 
     private void aggiornaPrezzoBundle(Bundle bundle) {
@@ -207,8 +240,9 @@ public class ProdottoService {
         bundle.setPrezzo(totale);
     }
 
+
     @Transactional
-    public Prodotto confermaBundle(Long bundleId, int quantitaFinale) {
+    public Prodotto confermaBundle(Long bundleId, int quantitaFinale, UtenteVerificato utente) {
 
         Bundle bundle = prodottoRepository.findBundleWithProdotti(bundleId)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle non trovato"));
@@ -221,7 +255,6 @@ public class ProdottoService {
             throw new IllegalStateException("Impossibile confermare: il bundle è vuoto.");
         }
 
-        // Verifica se c'è abbastanza scorta per ogni componente
         for (BundleItem item : bundle.getItems()) {
             Prodotto prodotto = item.getProdotto();
             int richiestaTotale = item.getQuantita() * quantitaFinale;
@@ -232,7 +265,6 @@ public class ProdottoService {
             }
         }
 
-        // Scala le quantità ora che le verifiche sono ok
         for (BundleItem item : bundle.getItems()) {
             Prodotto prodotto = item.getProdotto();
             int richiestaTotale = item.getQuantita() * quantitaFinale;
@@ -240,18 +272,19 @@ public class ProdottoService {
             prodottoRepository.save(prodotto);
         }
 
-        // Imposta quantità finale del bundle
         bundle.setQuantita(quantitaFinale);
-
-        // Ricalcola prezzo
         aggiornaPrezzoBundle(bundle);
-
-        // Aggiorna stato
         bundle.setConfermato(true);
         bundle.setAttesa(false);
 
+        if (bundle.getCreatore() == null)
+            bundle.setCreatore(utente);
+        if (bundle.getVenditoreId() == null)
+            bundle.setVenditoreId(utente.getId());
+
         return prodottoRepository.save(bundle);
     }
+
 
 
 
