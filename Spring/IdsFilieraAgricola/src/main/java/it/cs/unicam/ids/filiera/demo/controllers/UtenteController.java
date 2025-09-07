@@ -1,9 +1,6 @@
 package it.cs.unicam.ids.filiera.demo.controllers;
 
-import it.cs.unicam.ids.filiera.demo.dtos.LoginDTO;
-import it.cs.unicam.ids.filiera.demo.dtos.RegistrazioneDTO;
-import it.cs.unicam.ids.filiera.demo.dtos.UtenteDTO;
-import it.cs.unicam.ids.filiera.demo.dtos.WhoAmIDTO;
+import it.cs.unicam.ids.filiera.demo.dtos.*;
 import it.cs.unicam.ids.filiera.demo.dtos.eventoDto.EventoDTO;
 import it.cs.unicam.ids.filiera.demo.entity.Ordine;
 import it.cs.unicam.ids.filiera.demo.entity.Prodotto;
