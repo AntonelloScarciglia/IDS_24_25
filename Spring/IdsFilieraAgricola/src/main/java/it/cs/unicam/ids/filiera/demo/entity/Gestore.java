@@ -12,6 +12,8 @@ public class Gestore extends UtenteVerificato{
 
     public Gestore(String nome, String cognome, String email, String password) {
         super(nome, cognome, email, password);
+        this.setVerificato(true); 
     }
 
 }
+
